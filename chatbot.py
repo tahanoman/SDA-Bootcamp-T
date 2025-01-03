@@ -14,7 +14,6 @@ if "chat_names" not in st.session_state:
 # Functions to manage chats
 
 def load_chats_from_db():
-    print("111")
     response = requests.get("http://127.0.0.1:8000/load_chat/")
 
     if response.status_code == 200:
@@ -88,7 +87,6 @@ with st.sidebar:
             create_chat(chat_name.strip())
         else:
             st.warning("Chat name cannot be empty.")
-    print(st.session_state["current_chat"])
     if st.session_state["history_chats"]:
         chat_options = {
             chat["id"]: st.session_state["chat_names"][chat["id"]]
