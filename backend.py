@@ -120,14 +120,6 @@ async def save_chat(request: SaveChatRequest, db: psycopg2.extensions.connection
         raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
 
 
-from pydantic import BaseModel
-from fastapi import HTTPException, Depends
-import os
-
-# Request model for deleting a chat
-class DeleteChatRequest(BaseModel):
-    chat_id: str
-
 @app.post("/delete_chat/")
 async def delete_chat(request: DeleteChatRequest, db: psycopg2.extensions.connection = Depends(get_db)):
     try:

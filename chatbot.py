@@ -96,7 +96,7 @@ with st.sidebar:
             "Select Chat",
             options=list(chat_options.keys()),
             format_func=lambda x: chat_options[x],
-            index=list(chat_options.keys()).index(st.session_state["current_chat"]),
+            # index=list(chat_options.keys()).index(st.session_state["current_chat"]),
             key="chat_selector",
             on_change=lambda: select_chat(st.session_state.chat_selector),
         )
