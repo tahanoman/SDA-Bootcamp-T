@@ -7,7 +7,7 @@ Other than creating normal chat, user can upload `pdf` file to the chatbot and a
 
 In thie stage we will create a **new** table called `advanced_chats` in the database using following schema:
 ```
-CREATE TABLE IF NOT EXISTS chats (
+CREATE TABLE IF NOT EXISTS advanced_chats (
     id TEXT PRIMARY KEY,
     name TEXT NOT NULL,
     file_path TEXT NOT null,
