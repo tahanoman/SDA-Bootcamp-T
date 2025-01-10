@@ -21,14 +21,24 @@ or if you want, you can just add the extra columns in the `chats` database creat
 
 Please store your `OPENAI_API_KEY` and **Database Credentials** in `.env` file.
 
-Start the backend app first using:
+All the requirements are in the `requirements.txt`
+
+To use RAG, we need to start the chromaDB fisrt, using the follow command to start the Chroma server:
+```
+chroma run --path /db_path
+```
+change `/db_path` to the path you want to store the data, for example: `chromadb`.
+
+Then, start the backend app using:
 
 ```
-uvicorn backend:app --reload
+uvicorn backend:app --reload --port 5000
 ```
+
+| Compare to the last stage, we add a `port` parameter to change the port to `5000`, since the chromadb gonna use the port 8000 as well, so we add this to avoid port conflict.
 
 And then use 
 ```
 streamlit run chatbot.py
 ```
-to run the streamlit app. Make sure that always start the backend first!
+to run the streamlit app.

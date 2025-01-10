@@ -17,6 +17,7 @@ from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain.chains import create_history_aware_retriever, create_retrieval_chain
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain_core.messages import HumanMessage, AIMessage
+import chromadb
 
 load_dotenv()
 
@@ -32,14 +33,21 @@ client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
 model = "gpt-3.5-turbo"
 
-VECTOR_DB_DIR = "chromadb"
-os.makedirs(VECTOR_DB_DIR, exist_ok=True)
+# VECTOR_DB_DIR = "chromadb"
+# os.makedirs(VECTOR_DB_DIR, exist_ok=True)
 
 llm = ChatOpenAI(model=model)
 
 # LangChain setup
 embedding_function = OpenAIEmbeddings()
-vectorstore = Chroma(persist_directory=VECTOR_DB_DIR, embedding_function=embedding_function)
+chroma_client = chromadb.HttpClient(host='localhost', port=8000)
+collection = chroma_client.get_or_create_collection("langchain")
+vectorstore = Chroma(
+    client=chroma_client,
+    collection_name="langchain",
+    embedding_function=embedding_function,
+)
+
 
 app = FastAPI()
 
