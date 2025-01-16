@@ -4,7 +4,8 @@ import requests
 
 # Backend URLs define
 # BASE_URL = "http://127.0.0.1:8000/"
-BASE_URL = "http://localhost:7071/api/"
+# BASE_URL = "http://localhost:7071/api/"
+BASE_URL = "https://sda-project-demo-devid.azurewebsites.net/api/"
 
 LOAD_CHAT_URL = BASE_URL + "load_chat/"
 SAVE_CHAT_URL = BASE_URL + "save_chat/"

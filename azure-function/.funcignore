@@ -6,3 +6,6 @@ __queuestorage__
 local.settings.json
 test
 .venv
+pdf_sotre
+.history
+__pycache__
