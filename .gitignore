@@ -5,3 +5,8 @@
 /chromadb
 /pdf_store
 chroma.log
+/azure-function/.history
+/azure-function/.venv
+/azure-function/.vscode
+/azure-function/__pycache__
+azure-function/local.settings.json

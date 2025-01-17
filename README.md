@@ -19,6 +19,9 @@ CREATE TABLE IF NOT EXISTS advanced_chats (
 )
 ```
 Besides storing the `OPENAI_API_KEY` and **Database Credentials** in `.env` file, we also need to store `AZURE_STORAGE_SAS_URL` and `AZURE_STORAGE_CONTAINER` in order to connnect to the blob storage.
+
+After you move the database from VM to Azure Postgresql, don't forget to update the Database Credentials in the `.env` file.
+
 All the requirements are in the `requirements.txt`
 
 To use RAG, we need to start the chromaDB fisrt, using the follow command to start the Chroma server:
