@@ -39,17 +39,6 @@ cosmos_endpoint = os.environ.get("COSMOSDB_ENDPOINT")
 cosmos_key = os.environ.get("COSMOSDB_KEY")
 cosmos_database = os.environ.get("COSMOSDB_DATABASE")
 cosmos_container = os.environ.get("COSMOSDB_CONTAINER")
-# LangChain setup
-# embedding_function = OpenAIEmbeddings()
-# chroma_client = chromadb.HttpClient(host='4.242.36.157', port=8000)
-# collection = chroma_client.get_or_create_collection("langchain")
-# vectorstore = Chroma(
-#     client=chroma_client,
-#     collection_name="langchain",
-#     embedding_function=embedding_function,
-# )
-
-# llm = ChatOpenAI(model=model)
 
 
 app = func.FunctionApp(http_auth_level=func.AuthLevel.ANONYMOUS)
