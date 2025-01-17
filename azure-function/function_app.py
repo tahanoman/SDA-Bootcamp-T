@@ -16,6 +16,7 @@ from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain.chains import create_history_aware_retriever, create_retrieval_chain
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain_core.messages import HumanMessage, AIMessage
+from azure.cosmos import CosmosClient, PartitionKey
 import chromadb
 
 
@@ -40,6 +41,10 @@ storage_container_name = os.environ.get("AZURE_STORAGE_CONTAINER")
 storage_resource_uri = storage_account_sas_url.split('?')[0]
 token = storage_account_sas_url.split('?')[1]
 
+cosmos_endpoint = os.environ.get("COSMOSDB_ENDPOINT")
+cosmos_key = os.environ.get("COSMOSDB_KEY")
+cosmos_database = os.environ.get("COSMOSDB_DATABASE")
+cosmos_container = os.environ.get("COSMOSDB_CONTAINER")
 # LangChain setup
 # embedding_function = OpenAIEmbeddings()
 # chroma_client = chromadb.HttpClient(host='4.242.36.157', port=8000)
@@ -82,17 +87,35 @@ async def load_chat(req: func.HttpRequest) -> func.HttpResponse:
         for row in rows:
             chat_id, name, file_path, pdf_name, pdf_path, pdf_uuid= row["id"], row["name"], row["file_path"], row["pdf_name"], row["pdf_path"], row["pdf_uuid"]
 
-            blob_sas_url = f"{storage_resource_uri}/{storage_container_name}/{file_path}?{token}"
-            blob_client = BlobClient.from_blob_url(blob_sas_url)
+            # Load from blob
+            # blob_sas_url = f"{storage_resource_uri}/{storage_container_name}/{file_path}?{token}"
+            # blob_client = BlobClient.from_blob_url(blob_sas_url)
 
-            if blob_client.exists():
-                blob_data = blob_client.download_blob().readall()
-                messages = json.loads(blob_data)
-                records.append({"id": chat_id, "chat_name": name, "messages": messages, "pdf_name":pdf_name, "pdf_path":pdf_path, "pdf_uuid":pdf_uuid})
+            # if blob_client.exists():
+            #     blob_data = blob_client.download_blob().readall()
+            #     messages = json.loads(blob_data)
+            #     records.append({"id": chat_id, "chat_name": name, "messages": messages, "pdf_name":pdf_name, "pdf_path":pdf_path, "pdf_uuid":pdf_uuid})
+
+            # Load from Local
             # if os.path.exists(file_path):
             #     with open(file_path, "r", encoding="utf-8") as f:
             #         messages = json.load(f)
             #     records.append({"id": chat_id, "chat_name": name, "messages": messages, "pdf_name":pdf_name, "pdf_path":pdf_path, "pdf_uuid":pdf_uuid})
+
+            # Load from CosmosDB
+            client = CosmosClient(cosmos_endpoint, cosmos_key)
+            database = client.get_database_client(cosmos_database)
+            container = database.get_container_client(cosmos_container)
+
+            query = "SELECT * FROM c Where c.id = @chat_id"
+            parameters = [{"name": "@chat_id", "value": chat_id}]
+            items = list(container.query_items(query=query, parameters=parameters, enable_cross_partition_query=True))
+
+            if items:
+                messages = json.loads(items[0]["messages"])
+
+                records.append({"id": chat_id, "chat_name": name, "messages": messages, "pdf_name":pdf_name, "pdf_path":pdf_path, "pdf_uuid":pdf_uuid})
+
         db.close()
         return func.HttpResponse(body=json.dumps(records), status_code=200)
 
@@ -115,11 +138,22 @@ async def save_chat(req: func.HttpRequest) -> func.HttpResponse:
         # with open(file_path, "w", encoding="utf-8") as f:
         #     json.dump(request.messages, f, ensure_ascii=False, indent=4)
 
-        blob_sas_url = f"{storage_resource_uri}/{storage_container_name}/{file_path}?{token}"
-        blob_client = BlobClient.from_blob_url(blob_sas_url)
+        # blob_sas_url = f"{storage_resource_uri}/{storage_container_name}/{file_path}?{token}"
+        # blob_client = BlobClient.from_blob_url(blob_sas_url)
         messages_data = json.dumps(req.get_json()["messages"], ensure_ascii=False, indent=4)
-        blob_client.upload_blob(messages_data, overwrite=True)
-      
+        # blob_client.upload_blob(messages_data, overwrite=True)
+
+        client = CosmosClient(cosmos_endpoint, cosmos_key)
+        database = client.get_database_client(cosmos_database)
+        container = database.get_container_client(cosmos_container)
+
+        chat_data = {
+            "id": chat_id,
+            "messages": messages_data,
+        }
+
+        container.upsert_item(chat_data)
+
         # Insert or update database record
         with db.cursor() as cursor:
             cursor.execute(
