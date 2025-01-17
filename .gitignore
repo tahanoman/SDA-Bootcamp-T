@@ -1,0 +1,12 @@
+
+.env
+/__pycache__
+/azure-function/.history
+/azure-function/.venv
+/azure-function/.vscode
+/azure-function/__pycache__
+azure-function/local.settings.json
+/chat_logs
+chroma.log
+/chromadb
+/pdf_store
