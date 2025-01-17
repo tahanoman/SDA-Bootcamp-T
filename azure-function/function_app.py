@@ -1,5 +1,4 @@
 import azure.functions as func
-# from azurefunctions.extensions.http.fastapi import Request, StreamingResponse
 from openai import OpenAI
 import os
 import json
@@ -20,11 +19,6 @@ from azure.cosmos import CosmosClient, PartitionKey
 import chromadb
 
 
-# from dotenv import load_dotenv
-
-
-
-# load_dotenv()
 client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 model = "gpt-3.5-turbo"
 
@@ -68,9 +62,6 @@ def chat(req: func.HttpRequest) -> func.HttpResponse:
         # stream=True,
     )
 
-    # if you don't want to stream the output
-    # set the stream parameter to False in above function
-    # and uncommnet the belowing line
     return func.HttpResponse(stream.choices[0].message.content)
 
 
@@ -80,27 +71,12 @@ async def load_chat(req: func.HttpRequest) -> func.HttpResponse:
     try:
         
         with db.cursor(cursor_factory=RealDictCursor) as cursor:
-            cursor.execute("SELECT id, name, file_path, pdf_name, pdf_path, pdf_uuid FROM advanced_chats ORDER BY last_update DESC")
+            cursor.execute("SELECT id, name, pdf_name, pdf_path, pdf_uuid FROM advanced_chats_new ORDER BY last_update DESC")
             rows = cursor.fetchall()
 
         records = []
         for row in rows:
-            chat_id, name, file_path, pdf_name, pdf_path, pdf_uuid= row["id"], row["name"], row["file_path"], row["pdf_name"], row["pdf_path"], row["pdf_uuid"]
-
-            # Load from blob
-            # blob_sas_url = f"{storage_resource_uri}/{storage_container_name}/{file_path}?{token}"
-            # blob_client = BlobClient.from_blob_url(blob_sas_url)
-
-            # if blob_client.exists():
-            #     blob_data = blob_client.download_blob().readall()
-            #     messages = json.loads(blob_data)
-            #     records.append({"id": chat_id, "chat_name": name, "messages": messages, "pdf_name":pdf_name, "pdf_path":pdf_path, "pdf_uuid":pdf_uuid})
-
-            # Load from Local
-            # if os.path.exists(file_path):
-            #     with open(file_path, "r", encoding="utf-8") as f:
-            #         messages = json.load(f)
-            #     records.append({"id": chat_id, "chat_name": name, "messages": messages, "pdf_name":pdf_name, "pdf_path":pdf_path, "pdf_uuid":pdf_uuid})
+            chat_id, name, pdf_name, pdf_path, pdf_uuid= row["id"], row["name"], row["pdf_name"], row["pdf_path"], row["pdf_uuid"]
 
             # Load from CosmosDB
             client = CosmosClient(cosmos_endpoint, cosmos_key)
@@ -131,17 +107,8 @@ async def save_chat(req: func.HttpRequest) -> func.HttpResponse:
     db = psycopg2.connect(**DB_CONFIG)
     try:
         chat_id = req.get_json()["chat_id"]
-        file_path = f"chat_logs/{chat_id}.json" 
-        # os.makedirs("chat_logs", exist_ok=True)
-        
-        # Save messages to file
-        # with open(file_path, "w", encoding="utf-8") as f:
-        #     json.dump(request.messages, f, ensure_ascii=False, indent=4)
 
-        # blob_sas_url = f"{storage_resource_uri}/{storage_container_name}/{file_path}?{token}"
-        # blob_client = BlobClient.from_blob_url(blob_sas_url)
         messages_data = json.dumps(req.get_json()["messages"], ensure_ascii=False, indent=4)
-        # blob_client.upload_blob(messages_data, overwrite=True)
 
         client = CosmosClient(cosmos_endpoint, cosmos_key)
         database = client.get_database_client(cosmos_database)
@@ -158,12 +125,12 @@ async def save_chat(req: func.HttpRequest) -> func.HttpResponse:
         with db.cursor() as cursor:
             cursor.execute(
                 """
-                INSERT INTO advanced_chats (id, name, file_path, last_update, pdf_path, pdf_name, pdf_uuid)
-                VALUES (%s, %s, %s, CURRENT_TIMESTAMP, %s, %s, %s)
+                INSERT INTO advanced_chats_new (id, name, last_update, pdf_path, pdf_name, pdf_uuid)
+                VALUES (%s, %s, CURRENT_TIMESTAMP, %s, %s, %s)
                 ON CONFLICT (id)
-                DO UPDATE SET name = EXCLUDED.name, file_path = EXCLUDED.file_path, last_update = CURRENT_TIMESTAMP, pdf_path = EXCLUDED.pdf_path, pdf_name = EXCLUDED.pdf_name, pdf_uuid = EXCLUDED.pdf_uuid
+                DO UPDATE SET name = EXCLUDED.name, last_update = CURRENT_TIMESTAMP, pdf_path = EXCLUDED.pdf_path, pdf_name = EXCLUDED.pdf_name, pdf_uuid = EXCLUDED.pdf_uuid
                 """,
-                (req.get_json()["chat_id"], req.get_json()["chat_name"], file_path, req.get_json()["pdf_path"], req.get_json()["pdf_name"], req.get_json()["pdf_uuid"]),
+                (req.get_json()["chat_id"], req.get_json()["chat_name"], req.get_json()["pdf_path"], req.get_json()["pdf_name"], req.get_json()["pdf_uuid"]),
             )
         db.commit()
         db.close()
@@ -182,30 +149,28 @@ async def delete_chat(req: func.HttpRequest) -> func.HttpResponse:
     db = psycopg2.connect(**DB_CONFIG)
     try:
         # Retrieve the file path before deleting the record    
-        file_path = None
         with db.cursor() as cursor:
-            cursor.execute("SELECT file_path, pdf_path FROM advanced_chats WHERE id = %s", (req.get_json()["chat_id"],))
+            cursor.execute("SELECT pdf_path FROM advanced_chats_new WHERE id = %s", (req.get_json()["chat_id"],))
             result = cursor.fetchone()
             if result:
-                file_path = result[0]
-                pdf_path = result[1]
+                pdf_path = result[0]
             else:
                 return func.HttpResponse(status_code=404, detail="Chat not found")
 
         # Delete the record from the database
         with db.cursor() as cursor:
-            cursor.execute("DELETE FROM advanced_chats WHERE id = %s", (req.get_json()["chat_id"],))
+            cursor.execute("DELETE FROM advanced_chats_new WHERE id = %s", (req.get_json()["chat_id"],))
         db.commit()
         db.close()
-        # Delete the associated file, if it exists
-        # if file_path and os.path.exists(file_path):
-        #     os.remove(file_path)
-        
-        if file_path:
-            blob_sas_url = f"{storage_resource_uri}/{storage_container_name}/{file_path}?{token}"
-            blob_client = BlobClient.from_blob_url(blob_sas_url)
-            if blob_client.exists():
-                blob_client.delete_blob()
+
+        client = CosmosClient(cosmos_endpoint, cosmos_key)
+        database = client.get_database_client(cosmos_database)
+        container = database.get_container_client(cosmos_container)
+
+        container.delete_item(
+            item=req.get_json()["chat_id"],           
+            partition_key=req.get_json()["chat_id"]
+        )
 
         if pdf_path:
             blob_sas_url = f"{storage_resource_uri}/{storage_container_name}/{pdf_path}?{token}"
@@ -236,13 +201,13 @@ async def upload_pdf(req: func.HttpRequest) -> func.HttpResponse:
 
     try:
         pdf_uuid = str(uuid.uuid4())
-        file_path = f"pdf_store/{pdf_uuid}_{file.filename}"
+        pdf_path = f"pdf_store/{pdf_uuid}_{file.filename}"
         temp_path = f"/tmp/{file.filename}"
         # os.makedirs("pdf_store", exist_ok=True)
 
         with open(temp_path, "wb") as f:
             f.write(file.read())
-        blob_sas_url = f"{storage_resource_uri}/{storage_container_name}/{file_path}?{token}"
+        blob_sas_url = f"{storage_resource_uri}/{storage_container_name}/{pdf_path}?{token}"
         blob_client = BlobClient.from_blob_url(blob_sas_url)
         blob_client.upload_blob(temp_path, overwrite=True)
 
@@ -270,7 +235,7 @@ async def upload_pdf(req: func.HttpRequest) -> func.HttpResponse:
 
         os.remove(temp_path)
 
-        response = {"message": "File uploaded successfully", "pdf_path": file_path, "pdf_uuid":pdf_uuid}
+        response = {"message": "File uploaded successfully", "pdf_path": pdf_path, "pdf_uuid":pdf_uuid}
         return func.HttpResponse(body=json.dumps(response), status_code=200)
     except Exception as e:
         logging.error(e)
@@ -347,11 +312,6 @@ def rag_chat(req: func.HttpRequest) -> func.HttpResponse:
             chat_history.append(HumanMessage(content=message["content"]))
         if message["role"] == "assistant":
             chat_history.append(AIMessage(content=message["content"]))
-    
-    # response = rag_chain.invoke({
-    #     "chat_history":chat_history,
-    #     "input":user_input
-    # })
 
     chain = rag_chain.pick("answer")
 
@@ -360,10 +320,5 @@ def rag_chat(req: func.HttpRequest) -> func.HttpResponse:
         "input":user_input
     })
 
-    # def stream_response():
-    #         for chunk in stream:
-    #             yield chunk
-
-    # Use StreamingResponse to return
     return func.HttpResponse(response, status_code=200)
     
