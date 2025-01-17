@@ -1,5 +1,4 @@
 import azure.functions as func
-# from azurefunctions.extensions.http.fastapi import Request, StreamingResponse
 from openai import OpenAI
 import os
 import json
@@ -19,11 +18,6 @@ from langchain_core.messages import HumanMessage, AIMessage
 import chromadb
 
 
-# from dotenv import load_dotenv
-
-
-
-# load_dotenv()
 client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 model = "gpt-3.5-turbo"
 
@@ -40,18 +34,6 @@ storage_container_name = os.environ.get("AZURE_STORAGE_CONTAINER")
 storage_resource_uri = storage_account_sas_url.split('?')[0]
 token = storage_account_sas_url.split('?')[1]
 
-# LangChain setup
-# embedding_function = OpenAIEmbeddings()
-# chroma_client = chromadb.HttpClient(host='4.242.36.157', port=8000)
-# collection = chroma_client.get_or_create_collection("langchain")
-# vectorstore = Chroma(
-#     client=chroma_client,
-#     collection_name="langchain",
-#     embedding_function=embedding_function,
-# )
-
-# llm = ChatOpenAI(model=model)
-
 
 app = func.FunctionApp(http_auth_level=func.AuthLevel.ANONYMOUS)
 
@@ -63,9 +45,6 @@ def chat(req: func.HttpRequest) -> func.HttpResponse:
         # stream=True,
     )
 
-    # if you don't want to stream the output
-    # set the stream parameter to False in above function
-    # and uncommnet the belowing line
     return func.HttpResponse(stream.choices[0].message.content)
 
 
@@ -89,10 +68,6 @@ async def load_chat(req: func.HttpRequest) -> func.HttpResponse:
                 blob_data = blob_client.download_blob().readall()
                 messages = json.loads(blob_data)
                 records.append({"id": chat_id, "chat_name": name, "messages": messages, "pdf_name":pdf_name, "pdf_path":pdf_path, "pdf_uuid":pdf_uuid})
-            # if os.path.exists(file_path):
-            #     with open(file_path, "r", encoding="utf-8") as f:
-            #         messages = json.load(f)
-            #     records.append({"id": chat_id, "chat_name": name, "messages": messages, "pdf_name":pdf_name, "pdf_path":pdf_path, "pdf_uuid":pdf_uuid})
         db.close()
         return func.HttpResponse(body=json.dumps(records), status_code=200)
 
@@ -109,11 +84,6 @@ async def save_chat(req: func.HttpRequest) -> func.HttpResponse:
     try:
         chat_id = req.get_json()["chat_id"]
         file_path = f"chat_logs/{chat_id}.json" 
-        # os.makedirs("chat_logs", exist_ok=True)
-        
-        # Save messages to file
-        # with open(file_path, "w", encoding="utf-8") as f:
-        #     json.dump(request.messages, f, ensure_ascii=False, indent=4)
 
         blob_sas_url = f"{storage_resource_uri}/{storage_container_name}/{file_path}?{token}"
         blob_client = BlobClient.from_blob_url(blob_sas_url)
@@ -163,9 +133,7 @@ async def delete_chat(req: func.HttpRequest) -> func.HttpResponse:
             cursor.execute("DELETE FROM advanced_chats WHERE id = %s", (req.get_json()["chat_id"],))
         db.commit()
         db.close()
-        # Delete the associated file, if it exists
-        # if file_path and os.path.exists(file_path):
-        #     os.remove(file_path)
+
         
         if file_path:
             blob_sas_url = f"{storage_resource_uri}/{storage_container_name}/{file_path}?{token}"
@@ -204,7 +172,6 @@ async def upload_pdf(req: func.HttpRequest) -> func.HttpResponse:
         pdf_uuid = str(uuid.uuid4())
         file_path = f"pdf_store/{pdf_uuid}_{file.filename}"
         temp_path = f"/tmp/{file.filename}"
-        # os.makedirs("pdf_store", exist_ok=True)
 
         with open(temp_path, "wb") as f:
             f.write(file.read())
@@ -314,11 +281,6 @@ def rag_chat(req: func.HttpRequest) -> func.HttpResponse:
         if message["role"] == "assistant":
             chat_history.append(AIMessage(content=message["content"]))
     
-    # response = rag_chain.invoke({
-    #     "chat_history":chat_history,
-    #     "input":user_input
-    # })
-
     chain = rag_chain.pick("answer")
 
     response = chain.invoke({
@@ -326,9 +288,6 @@ def rag_chat(req: func.HttpRequest) -> func.HttpResponse:
         "input":user_input
     })
 
-    # def stream_response():
-    #         for chunk in stream:
-    #             yield chunk
 
     # Use StreamingResponse to return
     return func.HttpResponse(response, status_code=200)

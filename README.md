@@ -1,12 +1,12 @@
 # SDA-bootcamp-project
 
-Stage 3 - RAG Chatbot with Chat history - save file in blob storage
+Stage 7 - RAG Chatbot(Serverless Backebd)
 
-A RAG chatbot using streamlit and FastAPI. At this stage we will add the RAG function to the bot.
-Other than creating normal chat, user can upload `pdf` file to the chatbot and ask questions specific to this document.
-Since we are moving to the cloud, instead of storing the chat logs and pdf files on the instance, we can store them in the Azure blob storage to save more space for the instance.
+At this stage, we will move our backend functions to the Azure Function App. Which means we gonna convert the `backend.py` to the Azure Function. We will use Azure Function V2 here. We also switch the Stream Respons back to normal Http Response since this is a new function added in Azure Function and it will cause issue with incorrent Azure Function Runtime Version.
 
-In thie stage we still use the `advanced_chats` table with following schema:
+Another changes is that, in the `upload_pdf` function, we change the temporary store location for pdf file to `/tmp` since this is the only writable path for azure function.
+
+For the database we still use the `advanced_chats` table with following schema:
 ```
 CREATE TABLE IF NOT EXISTS advanced_chats (
     id TEXT PRIMARY KEY,
@@ -19,17 +19,37 @@ CREATE TABLE IF NOT EXISTS advanced_chats (
 )
 ```
 
-
-Besides storing the `OPENAI_API_KEY` and **Database Credentials** in `.env` file, we also need to store `AZURE_STORAGE_SAS_URL` and `AZURE_STORAGE_CONTAINER` in order to connnect to the blob storage.
-
-Start the backend app first using:
+Since we convert to the Azure Function, we need to store the credentials in the `local.settings.json` under the `azure-function` folder. The `local.settings.json` should look like:
 
 ```
-uvicorn backend:app --reload
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "",
+    "FUNCTIONS_WORKER_RUNTIME": "python",
+    "OPENAI_API_KEY": "<Your-OpenAI-API-Key>",
+    "DB_NAME": "<Your-DB-Name>",
+    "DB_USER": "<Your-DB-User>",
+    "DB_PASSWORD":"<Your-DB-Password>",
+    "DB_HOST": "<Your-DB-Host>",
+    "DB_PORT": "<Your-DB-Port>",
+    "AZURE_STORAGE_SAS_URL": "<Your-Azure-Storage-SAS-Url>",
+    "AZURE_STORAGE_CONTAINER": "<Your-Azure-Storage-Container>"
+  }
+}
 ```
 
-And then use 
+When deploy to the Azure function, don't forget to upload the `local.settings.json` to the cloud.
+
+
+We still need to run the ChromaDB and streamlit in the VM. Using the follow command to start the Chroma server:
+```
+chroma run --path /db_path
+```
+change `/db_path` to the path you want to store the data, for example: `chromadb`.
+
+And then use
 ```
 streamlit run chatbot.py
 ```
-to run the streamlit app. Make sure that always start the backend first!
+to run the streamlit app.
