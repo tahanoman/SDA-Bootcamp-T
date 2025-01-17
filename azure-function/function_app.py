@@ -39,6 +39,7 @@ cosmos_endpoint = os.environ.get("COSMOSDB_ENDPOINT")
 cosmos_key = os.environ.get("COSMOSDB_KEY")
 cosmos_database = os.environ.get("COSMOSDB_DATABASE")
 cosmos_container = os.environ.get("COSMOSDB_CONTAINER")
+cosmos_connection_string = os.environ.get("COSMOSDB_CONNECTION_STRING")
 # LangChain setup
 # embedding_function = OpenAIEmbeddings()
 # chroma_client = chromadb.HttpClient(host='4.242.36.157', port=8000)
@@ -103,23 +104,24 @@ async def load_chat(req: func.HttpRequest) -> func.HttpResponse:
     
 
 @app.route(route="save_chat", methods=[func.HttpMethod.POST])
-async def save_chat(req: func.HttpRequest) -> func.HttpResponse:
+@app.cosmos_db_output(arg_name="chathistory", 
+                      database_name=cosmos_database,
+                      container_name=cosmos_container,
+                      create_if_not_exists=True,
+                      connection='COSMOSDB_CONNECTION_STRING')
+async def save_chat(req: func.HttpRequest, chathistory: func.Out[func.Document]) -> func.HttpResponse:
     db = psycopg2.connect(**DB_CONFIG)
     try:
         chat_id = req.get_json()["chat_id"]
 
         messages_data = json.dumps(req.get_json()["messages"], ensure_ascii=False, indent=4)
 
-        client = CosmosClient(cosmos_endpoint, cosmos_key)
-        database = client.get_database_client(cosmos_database)
-        container = database.get_container_client(cosmos_container)
-
         chat_data = {
             "id": chat_id,
             "messages": messages_data,
         }
 
-        container.upsert_item(chat_data)
+        chathistory.set(func.Document.from_dict(chat_data))
 
         # Insert or update database record
         with db.cursor() as cursor:
