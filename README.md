@@ -1,6 +1,6 @@
 # SDA-bootcamp-project
 
-Stage 3 - RAG Chatbot with Chat history
+Stage 4 - **RAG** Chatbot with Chat history
 
 A RAG chatbot using streamlit and FastAPI. At this stage we will add the RAG function to the bot.
 Other than creating normal chat, user can upload `pdf` file to the chatbot and ask questions specific to this document 
@@ -35,7 +35,7 @@ Then, start the backend app using:
 uvicorn backend:app --reload --port 5000
 ```
 
-| Compare to the last stage, we add a `port` parameter to change the port to `5000`, since the chromadb gonna use the port 8000 as well, so we add this to avoid port conflict.
+> Compare to the last stage, we add a `port` parameter to change the port to `5000`, since the chromadb gonna use the port 8000 as well, so we add this to avoid port conflict.
 
 And then use 
 ```
