@@ -1,35 +1,38 @@
 # SDA-bootcamp-project
 
-Stage 3 - RAG Chatbot with Chat history - save file in blob storage
+Stage 9 - RAG Chatbot(Azure Function with Binding)
 
-A RAG chatbot using streamlit and FastAPI. At this stage we will add the RAG function to the bot.
-Other than creating normal chat, user can upload `pdf` file to the chatbot and ask questions specific to this document.
-Since we are moving to the cloud, instead of storing the chat logs and pdf files on the instance, we can store them in the Azure blob storage to save more space for the instance.
+At this stage, we will use **ouput binding** to connect to the CosmosDB when **saving the chat history**.
 
-In thie stage we still use the `advanced_chats` table with following schema:
+For the database we removed the `file_path` column in the `advanced_chats` table:
 ```
 CREATE TABLE IF NOT EXISTS advanced_chats (
     id TEXT PRIMARY KEY,
     name TEXT NOT NULL,
-    file_path TEXT NOT null,
+    -- file_path TEXT NOT null,
     last_update TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     pdf_path TEXT,
     pdf_name TEXT,
     pdf_uuid TEXT
 )
 ```
+Or if you want you can create a new table called `advanced_chats_new` using above query.
+
+> **Note:** The codes in this branch is just the showcase that how to interact with CosmosDB, so we **only** store the chat history to the CosmosDB. Actually students can upload all the metadata to the CosmosDB to replace the PostgreSQL. In that case, we also make the database fully serverless.
+
+Since we need to add the CosmosDB connection in the Azure Function,and to use binding, other than `COSMOSDB_ENDPOINT`, `COSMOSDB_KEY`, `COSMOSDB_DATABASE`, `COSMOSDB_CONTAINER`, **we also need to store the `COSMOSDB_CONNECTION_STRING`** in the `local.settings.json` under the `azure-function` folder.
 
 
-Besides storing the `OPENAI_API_KEY` and **Database Credentials** in `.env` file, we also need to store `AZURE_STORAGE_SAS_URL` and `AZURE_STORAGE_CONTAINER` in order to connnect to the blob storage.
+When deploy to the Azure function, don't forget to upload the `local.settings.json` to the cloud.
 
-Start the backend app first using:
-
+We still need to run the ChromaDB and streamlit in the VM. Using the follow command to start the Chroma server:
 ```
-uvicorn backend:app --reload
+chroma run --path /db_path
 ```
+change `/db_path` to the path you want to store the data, for example: `chromadb`.
 
-And then use 
+And then use
 ```
 streamlit run chatbot.py
 ```
-to run the streamlit app. Make sure that always start the backend first!
+to run the streamlit app.
