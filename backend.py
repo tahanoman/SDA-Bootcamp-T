@@ -18,6 +18,7 @@ from langchain.chains import create_history_aware_retriever, create_retrieval_ch
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain_core.messages import HumanMessage, AIMessage
 from azure.storage.blob import BlobClient
+from azure.cosmos import CosmosClient, PartitionKey
 
 load_dotenv()
 
@@ -46,6 +47,11 @@ storage_account_sas_url = os.environ.get("AZURE_STORAGE_SAS_URL")
 storage_container_name = os.environ.get("AZURE_STORAGE_CONTAINER")
 storage_resource_uri = storage_account_sas_url.split('?')[0]
 token = storage_account_sas_url.split('?')[1]
+
+cosmos_endpoint = os.environ.get("COSMOSDB_ENDPOINT")
+cosmos_key = os.environ.get("COSMOSDB_KEY")
+cosmos_database = os.environ.get("COSMOSDB_DATABASE")
+cosmos_container = os.environ.get("COSMOSDB_CONTAINER")
 
 app = FastAPI()
 
@@ -107,24 +113,26 @@ async def chat(request: ChatRequest):
 async def load_chat(db: psycopg2.extensions.connection = Depends(get_db)):
     try:
         with db.cursor(cursor_factory=RealDictCursor) as cursor:
-            cursor.execute("SELECT id, name, file_path, pdf_name, pdf_path, pdf_uuid FROM advanced_chats ORDER BY last_update DESC")
+            cursor.execute("SELECT id, name, pdf_name, pdf_path, pdf_uuid FROM advanced_chats_new ORDER BY last_update DESC")
             rows = cursor.fetchall()
 
         records = []
         for row in rows:
-            chat_id, name, file_path, pdf_name, pdf_path, pdf_uuid= row["id"], row["name"], row["file_path"], row["pdf_name"], row["pdf_path"], row["pdf_uuid"]
+            chat_id, name, pdf_name, pdf_path, pdf_uuid= row["id"], row["name"], row["pdf_name"], row["pdf_path"], row["pdf_uuid"]
 
-            blob_sas_url = f"{storage_resource_uri}/{storage_container_name}/{file_path}?{token}"
-            blob_client = BlobClient.from_blob_url(blob_sas_url)
+            # Load from CosmosDB
+            client = CosmosClient(cosmos_endpoint, cosmos_key)
+            database = client.get_database_client(cosmos_database)
+            container = database.get_container_client(cosmos_container)
 
-            if blob_client.exists():
-                blob_data = blob_client.download_blob().readall()
-                messages = json.loads(blob_data)
+            query = "SELECT * FROM c Where c.id = @chat_id"
+            parameters = [{"name": "@chat_id", "value": chat_id}]
+            items = list(container.query_items(query=query, parameters=parameters, enable_cross_partition_query=True))
+
+            if items:
+                messages = json.loads(items[0]["messages"])
+
                 records.append({"id": chat_id, "chat_name": name, "messages": messages, "pdf_name":pdf_name, "pdf_path":pdf_path, "pdf_uuid":pdf_uuid})
-            # if os.path.exists(file_path):
-            #     with open(file_path, "r", encoding="utf-8") as f:
-            #         messages = json.load(f)
-            #     records.append({"id": chat_id, "chat_name": name, "messages": messages, "pdf_name":pdf_name, "pdf_path":pdf_path, "pdf_uuid":pdf_uuid})
 
         return records
 
@@ -134,28 +142,29 @@ async def load_chat(db: psycopg2.extensions.connection = Depends(get_db)):
 @app.post("/save_chat/")
 async def save_chat(request: SaveChatRequest, db: psycopg2.extensions.connection = Depends(get_db)):
     try:
-        file_path = f"chat_logs/{request.chat_id}.json"
-        # os.makedirs("chat_logs", exist_ok=True)
-        
-        # Save messages to file
-        # with open(file_path, "w", encoding="utf-8") as f:
-        #     json.dump(request.messages, f, ensure_ascii=False, indent=4)
-
-        blob_sas_url = f"{storage_resource_uri}/{storage_container_name}/{file_path}?{token}"
-        blob_client = BlobClient.from_blob_url(blob_sas_url)
         messages_data = json.dumps(request.messages, ensure_ascii=False, indent=4)
-        blob_client.upload_blob(messages_data, overwrite=True)
+
+        client = CosmosClient(cosmos_endpoint, cosmos_key)
+        database = client.get_database_client(cosmos_database)
+        container = database.get_container_client(cosmos_container)
+
+        chat_data = {
+            "id": request.chat_id,
+            "messages": messages_data,
+        }
+
+        container.upsert_item(chat_data)
         
         # Insert or update database record
         with db.cursor() as cursor:
             cursor.execute(
                 """
-                INSERT INTO advanced_chats (id, name, file_path, last_update, pdf_path, pdf_name, pdf_uuid)
-                VALUES (%s, %s, %s, CURRENT_TIMESTAMP, %s, %s, %s)
+                INSERT INTO advanced_chats_new (id, name, last_update, pdf_path, pdf_name, pdf_uuid)
+                VALUES (%s, %s, CURRENT_TIMESTAMP, %s, %s, %s)
                 ON CONFLICT (id)
-                DO UPDATE SET name = EXCLUDED.name, file_path = EXCLUDED.file_path, last_update = CURRENT_TIMESTAMP, pdf_path = EXCLUDED.pdf_path, pdf_name = EXCLUDED.pdf_name, pdf_uuid = EXCLUDED.pdf_uuid
+                DO UPDATE SET name = EXCLUDED.name, last_update = CURRENT_TIMESTAMP, pdf_path = EXCLUDED.pdf_path, pdf_name = EXCLUDED.pdf_name, pdf_uuid = EXCLUDED.pdf_uuid
                 """,
-                (request.chat_id, request.chat_name, file_path, request.pdf_path, request.pdf_name, request.pdf_uuid),
+                (request.chat_id, request.chat_name, request.pdf_path, request.pdf_name, request.pdf_uuid),
             )
         db.commit()
         return {"message": "Chat saved successfully"}
@@ -169,13 +178,11 @@ async def save_chat(request: SaveChatRequest, db: psycopg2.extensions.connection
 async def delete_chat(request: DeleteChatRequest, db: psycopg2.extensions.connection = Depends(get_db)):
     try:
         # Retrieve the file path before deleting the record
-        file_path = None
         with db.cursor() as cursor:
-            cursor.execute("SELECT file_path, pdf_path FROM advanced_chats WHERE id = %s", (request.chat_id,))
+            cursor.execute("SELECT pdf_path FROM advanced_chats_new WHERE id = %s", (req.get_json()["chat_id"],))
             result = cursor.fetchone()
             if result:
-                file_path = result[0]
-                pdf_path = result[1]
+                pdf_path = result[0]
             else:
                 raise HTTPException(status_code=404, detail="Chat not found")
 
@@ -188,11 +195,14 @@ async def delete_chat(request: DeleteChatRequest, db: psycopg2.extensions.connec
         # if file_path and os.path.exists(file_path):
         #     os.remove(file_path)
         
-        if file_path:
-            blob_sas_url = f"{storage_resource_uri}/{storage_container_name}/{file_path}?{token}"
-            blob_client = BlobClient.from_blob_url(blob_sas_url)
-            if blob_client.exists():
-                blob_client.delete_blob()
+        client = CosmosClient(cosmos_endpoint, cosmos_key)
+        database = client.get_database_client(cosmos_database)
+        container = database.get_container_client(cosmos_container)
+
+        container.delete_item(
+            item=request.chat_id,           
+            partition_key=request.chat_id
+        )
 
         if pdf_path:
             blob_sas_url = f"{storage_resource_uri}/{storage_container_name}/{pdf_path}?{token}"
