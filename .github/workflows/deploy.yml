@@ -43,15 +43,15 @@ jobs:
         ssh -o StrictHostKeyChecking=no -i deploy_key.pem $DEPLOY_USER@$DEPLOY_HOST << 'EOF'
           set -e
           echo "Navigating to application path..."
-          cd /home/$DEPLOY_USER/${{ github.event.repository.name }}
+          cd /home/${{ secrets.DEPLOY_USER }}/${{ github.event.repository.name }}
 
           echo "Pulling latest changes..."
           git pull  # No git reset --hard to avoid discarding uncommitted changes
 
           echo "Installing dependencies"
           
-          /home/$DEPLOY_USER/miniconda3/envs/myenv2/bin/pip install --upgrade pip
-          /home/$DEPLOY_USER/miniconda3/envs/myenv2/bin/pip install -r requirements.txt
+          /home/${{ secrets.DEPLOY_USER }}/miniconda3/envs/myenv2/bin/pip install --upgrade pip
+          /home/${{ secrets.DEPLOY_USER }}/miniconda3/envs/myenv2/bin/pip install -r requirements.txt
 
           echo "Restarting application service..."
           sudo systemctl restart chromadb
