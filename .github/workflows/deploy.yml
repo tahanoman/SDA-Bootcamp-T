@@ -34,7 +34,6 @@ jobs:
         DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
         DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
         DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
-        APP_PATH: ${{ secrets.APP_PATH }}
       run: |
         echo "Setting up SSH key..."
         echo "${DEPLOY_KEY}" > deploy_key.pem
@@ -44,7 +43,7 @@ jobs:
         ssh -o StrictHostKeyChecking=no -i deploy_key.pem $DEPLOY_USER@$DEPLOY_HOST << 'EOF'
           set -e
           echo "Navigating to application path..."
-          cd ${APP_PATH}
+          cd /home/${DEPLOY_USER}/${{ github.event.repository.name }}
 
           echo "Pulling latest changes..."
           git pull  # No git reset --hard to avoid discarding uncommitted changes
