@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS advanced_chats (
     pdf_uuid TEXT
 )
 ```
-Besides storing the `OPENAI_API_KEY` and **Database Credentials** in `.env` file, we also need to store `AZURE_STORAGE_SAS_URL` and `AZURE_STORAGE_CONTAINER` in order to connnect to the blob storage.
+Besides storing the `OPENAI_API_KEY` and **Database Credentials** in `.env` file, we also need to store `AZURE_STORAGE_SAS_URL` (Blob Service SAS URL) and `AZURE_STORAGE_CONTAINER` (name) in order to connnect to the blob storage.
 
 After you move the database from VM to Azure Postgresql, don't forget to update the Database Credentials in the `.env` file.
 
