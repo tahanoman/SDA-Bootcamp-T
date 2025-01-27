@@ -1,12 +1,7 @@
-from openai import OpenAI
 import streamlit as st
-import os 
-from dotenv import load_dotenv
 import requests
 
 st.title("Chatbot basic")
-
-load_dotenv()
 
 chat_url = "http://127.0.0.1:8000/chat/"
 
