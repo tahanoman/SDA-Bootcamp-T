@@ -29,18 +29,25 @@ KVUri = f"https://{keyVaultName}.vault.azure.net"
 credential = DefaultAzureCredential()
 client = SecretClient(vault_url=KVUri, credential=credential)
 
-retrieved_secret = client.get_secret('PROJ-DB-HOST')
-print(retrieved_secret)
+DB_NAME = client.get_secret('PROJ-DB-NAME').value
+DB_USER = client.get_secret('PROJ-DB-USER').value
+DB_PASSWORD = client.get_secret('PROJ-DB-PASSWORD').value
+DB_HOST = client.get_secret('PROJ-DB-HOST').value
+DB_PORT = client.get_secret('PROJ-DB-PORT').value
+OPENAI_API_KEY = client.get_secret('PROJ-OPENAI-API-KEY').value
+AZURE_STORAGE_SAS_URL = client.get_secret('PROJ-AZURE-STORAGE-SAS-URL').value
+AZURE_STORAGE_CONTAINER = client.get_secret('PROJ-AZURE-STORAGE-CONTAINER').value
+
 
 DB_CONFIG = {
-    "dbname": os.environ.get("DB_NAME"),
-    "user": os.environ.get("DB_USER"),
-    "password": os.environ.get("DB_PASSWORD"),
-    "host": os.environ.get("DB_HOST"),
-    "port": os.environ.get("DB_PORT"),
+    "dbname": DB_NAME,
+    "user": DB_USER,
+    "password": DB_PASSWORD,
+    "host": DB_HOST,
+    "port": DB_PORT,
 }
 
-client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+client = OpenAI(api_key=OPENAI_API_KEY)
 
 model = "gpt-3.5-turbo"
 
@@ -53,8 +60,8 @@ llm = ChatOpenAI(model=model)
 embedding_function = OpenAIEmbeddings()
 vectorstore = Chroma(persist_directory=VECTOR_DB_DIR, embedding_function=embedding_function)
 
-storage_account_sas_url = os.environ.get("AZURE_STORAGE_SAS_URL")
-storage_container_name = os.environ.get("AZURE_STORAGE_CONTAINER")
+storage_account_sas_url = AZURE_STORAGE_SAS_URL
+storage_container_name = AZURE_STORAGE_CONTAINER
 storage_resource_uri = storage_account_sas_url.split('?')[0]
 token = storage_account_sas_url.split('?')[1]
 
