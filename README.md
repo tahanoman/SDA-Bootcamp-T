@@ -1,6 +1,6 @@
 # SDA-bootcamp-project
 
-Stage 6 - **RAG** Chatbot with Chat history **(Cloud Storage)**
+Stage 6.5 - **RAG** Chatbot with Chat history **(Cloud Storage+KeyVault)**
 
 A RAG chatbot using streamlit and FastAPI. At this stage we will add the RAG function to the bot.
 Other than creating normal chat, user can upload `pdf` file to the chatbot and ask questions specific to this document.
@@ -18,9 +18,7 @@ CREATE TABLE IF NOT EXISTS advanced_chats (
     pdf_uuid TEXT
 )
 ```
-Besides storing the `OPENAI_API_KEY` and **Database Credentials** in `.env` file, we also need to store `AZURE_STORAGE_SAS_URL` (Blob Service SAS URL) and `AZURE_STORAGE_CONTAINER` (name) in order to connnect to the blob storage.
-
-After you move the database from VM to Azure Postgresql, don't forget to update the Database Credentials in the `.env` file.
+**At this stage, since we learned the Azure KeyVault, we can store the environment variables(variables in `.env` file) in the Azure KeyVault and load from there. To do this we need to enable the *System Assigned Identity* for the VM and add it to the Key Vault Access Control as a `Key Vault Secrets User`. For the Detailed steps you can check [this toturial](GrantKeyVaultAccessToVM.md)**
 
 All the requirements are in the `requirements.txt`
 
