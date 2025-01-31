@@ -6,7 +6,7 @@ This document provides a detailed explanation of the updated `backend.py` script
 
 ## 1. Import Required Libraries
 
-The script imports necessary libraries to facilitate API creation, database connectivity, environment variable handling, and integration with OpenAI, LangChain, and Azure Blob Storage:
+The script imports necessary libraries to facilitate API creation, database connectivity, environment variable handling, and integration with OpenAI, LangChain, Azure Blob Storage, and Azure Key Vault:
 
 ```python
 from fastapi import FastAPI, File, UploadFile, HTTPException, Depends
@@ -29,6 +29,8 @@ from langchain.chains import create_history_aware_retriever, create_retrieval_ch
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain_core.messages import HumanMessage, AIMessage
 from azure.storage.blob import BlobClient
+from azure.identity import DefaultAzureCredential
+from azure.keyvault.secrets import SecretClient
 ```
 
 - **`FastAPI`**: Provides an easy-to-use framework for API development.
@@ -45,45 +47,70 @@ from azure.storage.blob import BlobClient
 - **`LangChain`**: Used for document processing, embeddings, and retrieval-augmented generation (RAG).
 - **`Chroma`**: A vector database for storing and querying embeddings.
 - **`BlobClient`**: Interacts with Azure Blob Storage for file management.
+- **`DefaultAzureCredential`**: Authenticates with Azure services.
+- **`SecretClient`**: Retrieves secrets from Azure Key Vault.
 
 ---
 
-## 2. Load Environment Variables
+## 2. Load Environment Variables and Azure Key Vault Secrets
 
-Loads sensitive credentials from an environment file:
+Loads sensitive credentials from environment variables and Azure Key Vault:
 
 ```python
 load_dotenv()
+
+keyVaultName = os.environ["KEY_VAULT_NAME"]
+KVUri = f"https://{keyVaultName}.vault.azure.net"
+
+credential = DefaultAzureCredential()
+client = SecretClient(vault_url=KVUri, credential=credential)
+
+DB_NAME = client.get_secret('PROJ-DB-NAME').value
+DB_USER = client.get_secret('PROJ-DB-USER').value
+DB_PASSWORD = client.get_secret('PROJ-DB-PASSWORD').value
+DB_HOST = client.get_secret('PROJ-DB-HOST').value
+DB_PORT = client.get_secret('PROJ-DB-PORT').value
+OPENAI_API_KEY = client.get_secret('PROJ-OPENAI-API-KEY').value
+AZURE_STORAGE_SAS_URL = client.get_secret('PROJ-AZURE-STORAGE-SAS-URL').value
+AZURE_STORAGE_CONTAINER = client.get_secret('PROJ-AZURE-STORAGE-CONTAINER').value
 ```
 
-- `load_dotenv()`: Reads key-value pairs from the `.env` file into environment variables.
+- **`load_dotenv()`**: Reads key-value pairs from the `.env` file into environment variables.
+- **`keyVaultName`**: Name of the Azure Key Vault.
+- **`KVUri`**: URI for accessing the Azure Key Vault.
+- **`credential`**: Authenticates with Azure services using the default credentials.
+- **`SecretClient`**: Retrieves secrets from Azure Key Vault.
+- **`DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_HOST`, `DB_PORT`**: Database connection parameters.
+- **`OPENAI_API_KEY`**: API key for OpenAI.
+- **`AZURE_STORAGE_SAS_URL`**: SAS URL for accessing Azure Blob Storage.
+- **`AZURE_STORAGE_CONTAINER`**: Name of the container in Azure Blob Storage.
 
 ---
 
 ## 3. Database Configuration
 
-Defines database connection parameters using environment variables:
+Defines database connection parameters using secrets from Azure Key Vault:
 
 ```python
 DB_CONFIG = {
-    "dbname": os.environ.get("DB_NAME"),
-    "user": os.environ.get("DB_USER"),
-    "password": os.environ.get("DB_PASSWORD"),
-    "host": os.environ.get("DB_HOST"),
-    "port": os.environ.get("DB_PORT"),
+    "dbname": DB_NAME,
+    "user": DB_USER,
+    "password": DB_PASSWORD,
+    "host": DB_HOST,
+    "port": DB_PORT,
 }
 ```
 
-- Each key retrieves credentials securely from environment variables.
+- Each key retrieves credentials securely from Azure Key Vault.
 
 ---
 
 ## 4. OpenAI Client Initialization
 
-Initializes the OpenAI client using an API key:
+Initializes the OpenAI client using an API key from Azure Key Vault:
 
 ```python
-client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+client = OpenAI(api_key=OPENAI_API_KEY)
 model = "gpt-3.5-turbo"
 ```
 
@@ -117,8 +144,8 @@ vectorstore = Chroma(persist_directory=VECTOR_DB_DIR, embedding_function=embeddi
 Configures Azure Blob Storage for file management:
 
 ```python
-storage_account_sas_url = os.environ.get("AZURE_STORAGE_SAS_URL")
-storage_container_name = os.environ.get("AZURE_STORAGE_CONTAINER")
+storage_account_sas_url = AZURE_STORAGE_SAS_URL
+storage_container_name = AZURE_STORAGE_CONTAINER
 storage_resource_uri = storage_account_sas_url.split('?')[0]
 token = storage_account_sas_url.split('?')[1]
 ```
@@ -517,71 +544,4 @@ async def rag_chat(request: RAGChatRequest):
     )
 ```
 
-- Configures the retriever to contextualize the user's question based on chat history.
-
-```python
-    system_prompt = (
-        "You are an assistant for question-answering tasks. "
-        "Use the following pieces of retrieved context to answer "
-        "the question. If you don't know the answer, say that you "
-        "don't know. Use three sentences maximum and keep the "
-        "answer concise."
-        "\n\n"
-        "{context}"
-    )
-    qa_prompt = ChatPromptTemplate.from_messages(
-        [
-            ("system", system_prompt),
-            MessagesPlaceholder("chat_history"),
-            ("human", "{input}"),
-        ]
-    )
-    question_answer_chain = create_stuff_documents_chain(llm, qa_prompt)
-```
-
-- Configures the QA chain to generate concise answers based on retrieved context.
-
-```python
-    rag_chain = create_retrieval_chain(history_aware_retriever, question_answer_chain)
-```
-
-- Combines the retriever and QA chain into a RAG chain.
-
-```python
-    chat_history = []
-    user_input = request.messages[-1]
-    previous_chat = request.messages[:-1]
-```
-
-- Prepares the chat history and user input for processing.
-
-```python
-    for message in request.messages:
-        if message["role"] == "user":
-            chat_history.append(HumanMessage(content=message["content"]))
-        if message["role"] == "assistant":
-            chat_history.append(AIMessage(content=message["content"]))
-```
-
-- Converts chat messages into LangChain message objects.
-
-```python
-    chain = rag_chain.pick("answer")
-    stream = chain.stream({
-        "chat_history": chat_history,
-        "input": user_input
-    })
-```
-
-- Streams the RAG response in real-time.
-
-```python
-    def stream_response():
-        for chunk in stream:
-            yield chunk
-```
-
-- Yields chunks of the response to the client.
-
-```python
-    return StreamingResponse(stream_response(), media
+- Configures the retriever to contextualize the user's question

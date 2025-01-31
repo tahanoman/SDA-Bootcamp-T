@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS advanced_chats (
     pdf_uuid TEXT
 )
 ```
-**At this stage, since we learned the Azure KeyVault, we can store the environment variables(variables in `.env` file) in the Azure KeyVault and load from there. To do this we need to enable the *System Assigned Identity* for the VM and add it to the Key Vault Access Control as a `Key Vault Secrets User`. For the Detailed steps you can check [this toturial](GrantKeyVaultAccessToVM.md)**
+**At this stage, since we learned the Azure KeyVault, we can store all the environment variables(***Except `KEY_VAULT_NAME`***) in the Azure KeyVault and load from there. To do this we need to enable the *System Assigned Identity* for the VM and add it to the Key Vault Access Control as a `Key Vault Secrets User`. For the Detailed steps you can check [this toturial](GrantKeyVaultAccessToVM.md)**
 
 All the requirements are in the `requirements.txt`
 
