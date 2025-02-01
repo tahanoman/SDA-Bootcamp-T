@@ -11,13 +11,13 @@ from psycopg2.extras import RealDictCursor
 from typing import List, Optional
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_openai import OpenAIEmbeddings, ChatOpenAI
-from langchain_chroma import Chroma
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain.chains import create_history_aware_retriever, create_retrieval_chain
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain_core.messages import HumanMessage, AIMessage
 from azure.storage.blob import BlobClient
+import chromadb
 
 load_dotenv()
 
@@ -33,14 +33,14 @@ client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
 model = "gpt-3.5-turbo"
 
-VECTOR_DB_DIR = "chromadb"
-os.makedirs(VECTOR_DB_DIR, exist_ok=True)
+# VECTOR_DB_DIR = "chromadb"
+# os.makedirs(VECTOR_DB_DIR, exist_ok=True)
 
 llm = ChatOpenAI(model=model)
 
 # LangChain setup
 embedding_function = OpenAIEmbeddings()
-vectorstore = Chroma(persist_directory=VECTOR_DB_DIR, embedding_function=embedding_function)
+vectorstore = chromadb.HttpClient(host=os.environ.get("CHROMADB_HOST"), port=os.environ.get("CHROMADB_PORT"))
 
 storage_account_sas_url = os.environ.get("AZURE_STORAGE_SAS_URL")
 storage_container_name = os.environ.get("AZURE_STORAGE_CONTAINER")
