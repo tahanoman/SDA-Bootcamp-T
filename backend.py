@@ -20,6 +20,7 @@ from langchain_core.messages import HumanMessage, AIMessage
 from azure.storage.blob import BlobClient
 from azure.identity import DefaultAzureCredential
 from azure.keyvault.secrets import SecretClient
+import chromadb
 
 load_dotenv()
 
@@ -37,6 +38,8 @@ DB_PORT = client.get_secret('PROJ-DB-PORT').value
 OPENAI_API_KEY = client.get_secret('PROJ-OPENAI-API-KEY').value
 AZURE_STORAGE_SAS_URL = client.get_secret('PROJ-AZURE-STORAGE-SAS-URL').value
 AZURE_STORAGE_CONTAINER = client.get_secret('PROJ-AZURE-STORAGE-CONTAINER').value
+CHROMADB_HOST = client.get_secret('PROJ-CHROMADB-HOST').value
+CHROMADB_PORT = client.get_secret('PROJ-CHROMADB-PORT').value
 
 
 DB_CONFIG = {
@@ -51,14 +54,20 @@ client = OpenAI(api_key=OPENAI_API_KEY)
 
 model = "gpt-3.5-turbo"
 
-VECTOR_DB_DIR = "chromadb"
-os.makedirs(VECTOR_DB_DIR, exist_ok=True)
+# VECTOR_DB_DIR = "chromadb"
+# os.makedirs(VECTOR_DB_DIR, exist_ok=True)
 
 llm = ChatOpenAI(model=model)
 
 # LangChain setup
 embedding_function = OpenAIEmbeddings()
-vectorstore = Chroma(persist_directory=VECTOR_DB_DIR, embedding_function=embedding_function)
+chroma_client = chromadb.HttpClient(host=os.environ.get("CHROMADB_HOST"), port=os.environ.get("CHROMADB_PORT"))
+collection = chroma_client.get_or_create_collection("langchain")
+vectorstore = Chroma(
+            client=chroma_client,
+            collection_name="langchain",
+            embedding_function=embedding_function,
+)
 
 storage_account_sas_url = AZURE_STORAGE_SAS_URL
 storage_container_name = AZURE_STORAGE_CONTAINER
