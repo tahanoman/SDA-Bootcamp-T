@@ -40,4 +40,4 @@ jobs:
           --vm-name ${{ secrets.VM_NAME }} \
           --name CustomScript \
           --publisher Microsoft.Azure.Extensions \
-          --settings '{"commandToExecute": "bash /home/azureuser/SDA-bootcamp-project/update_app.sh"}'
+          --settings '\{"commandToExecute": "bash /home/azureuser/SDA-bootcamp-project/update_app.sh"\}'
