@@ -2,6 +2,7 @@
 
 set -e
 
+date
 echo "Updating Python application on VM..."
 
 APP_DIR="/home/azureuser/SDA-bootcamp-project"
