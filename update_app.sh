@@ -7,7 +7,7 @@ echo "Updating Python application on VM..."
 
 APP_DIR="/home/azureuser/SDA-bootcamp-project"
 REPO_URL="github.com/beam-data/SDA-bootcamp-project.git"
-BRANCH="stage-6"
+BRANCH="stage-6.1"
 GITHUB_TOKEN=$GITHUB_TOKEN
 
 # Update code
