@@ -20,8 +20,7 @@ fi
 
 # Install dependencies
 sudo -u azureuser /home/azureuser/miniconda3/envs/myenv2/bin/pip install --upgrade pip
-sudo -u azureuser /home/azureuser/miniconda3/envs/myenv2/bin/pip install -r /home/azureuser/SDA-bootcamp-project/requirements.txt
-
+sudo -u azureuser /home/azureuser/miniconda3/envs/myenv2/bin/pip install -r ${APP_DIR}/requirements.txt
 
 # Restart the service
 sudo systemctl restart backend
