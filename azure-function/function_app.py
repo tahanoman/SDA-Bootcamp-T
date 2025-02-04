@@ -15,49 +15,56 @@ from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain.chains import create_history_aware_retriever, create_retrieval_chain
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain_core.messages import HumanMessage, AIMessage
+from azure.identity import DefaultAzureCredential
+from azure.keyvault.secrets import SecretClient
 from azure.cosmos import CosmosClient, PartitionKey
 import chromadb
 
+keyVaultName = os.environ.get("KEY_VAULT_NAME")
+KVUri = f"https://{keyVaultName}.vault.azure.net"
+credential = DefaultAzureCredential()
+kv_client = SecretClient(vault_url=KVUri, credential=credential)
 
-client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+
+
+DB_NAME = kv_client.get_secret('PROJ-DB-NAME').value
+DB_USER = kv_client.get_secret('PROJ-DB-USER').value
+DB_PASSWORD = kv_client.get_secret('PROJ-DB-PASSWORD').value
+DB_HOST = kv_client.get_secret('PROJ-DB-HOST').value
+DB_PORT = kv_client.get_secret('PROJ-DB-PORT').value
+OPENAI_API_KEY = kv_client.get_secret('PROJ-OPENAI-API-KEY').value
+AZURE_STORAGE_SAS_URL = kv_client.get_secret('PROJ-AZURE-STORAGE-SAS-URL').value
+AZURE_STORAGE_CONTAINER = kv_client.get_secret('PROJ-AZURE-STORAGE-CONTAINER').value
+CHROMADB_HOST = kv_client.get_secret('PROJ-CHROMADB-HOST').value
+CHROMADB_PORT = kv_client.get_secret('PROJ-CHROMADB-PORT').value
+cosmos_endpoint = kv_client.get_secret('PROJ-COSMOSDB-ENDPOINT').value
+cosmos_key = kv_client.get_secret('PROJ-COSMOSDB-KEY').value
+cosmos_database = kv_client.get_secret('PROJ-COSMOSDB-DATABASE').value
+cosmos_container = kv_client.get_secret('PROJ-COSMOSDB-CONTAINER').value
+
+chat_client = OpenAI(api_key=OPENAI_API_KEY)
 model = "gpt-3.5-turbo"
 
 DB_CONFIG = {
-    "dbname": os.environ.get("DB_NAME"),
-    "user": os.environ.get("DB_USER"),
-    "password": os.environ.get("DB_PASSWORD"),
-    "host": os.environ.get("DB_HOST"),
-    "port": os.environ.get("DB_PORT"),
+    "dbname": DB_NAME,
+    "user": DB_USER,
+    "password": DB_PASSWORD,
+    "host": DB_HOST,
+    "port": DB_PORT,
 }
 
-storage_account_sas_url = os.environ.get("AZURE_STORAGE_SAS_URL")
-storage_container_name = os.environ.get("AZURE_STORAGE_CONTAINER")
+storage_account_sas_url = AZURE_STORAGE_SAS_URL
+storage_container_name = AZURE_STORAGE_CONTAINER
 storage_resource_uri = storage_account_sas_url.split('?')[0]
 token = storage_account_sas_url.split('?')[1]
 
-cosmos_endpoint = os.environ.get("COSMOSDB_ENDPOINT")
-cosmos_key = os.environ.get("COSMOSDB_KEY")
-cosmos_database = os.environ.get("COSMOSDB_DATABASE")
-cosmos_container = os.environ.get("COSMOSDB_CONTAINER")
-cosmos_connection_string = os.environ.get("COSMOSDB_CONNECTION_STRING")
-# LangChain setup
-# embedding_function = OpenAIEmbeddings()
-# chroma_client = chromadb.HttpClient(host='4.242.36.157', port=8000)
-# collection = chroma_client.get_or_create_collection("langchain")
-# vectorstore = Chroma(
-#     client=chroma_client,
-#     collection_name="langchain",
-#     embedding_function=embedding_function,
-# )
-
-# llm = ChatOpenAI(model=model)
 
 
 app = func.FunctionApp(http_auth_level=func.AuthLevel.ANONYMOUS)
 
 @app.route(route="chat", methods=[func.HttpMethod.POST])
 def chat(req: func.HttpRequest) -> func.HttpResponse:
-    stream = client.chat.completions.create(
+    stream = chat_client.chat.completions.create(
         model=model,
         messages=req.get_json()['messages'],
         # stream=True,
@@ -220,8 +227,8 @@ async def upload_pdf(req: func.HttpRequest) -> func.HttpResponse:
         texts = text_splitter.split_documents(documents)
 
         # Add to ChromaDB
-        embedding_function = OpenAIEmbeddings()
-        chroma_client = chromadb.HttpClient(host='4.242.36.157', port=8000)
+        embedding_function = OpenAIEmbeddings(api_key=OPENAI_API_KEY)
+        chroma_client = chromadb.HttpClient(host=CHROMADB_HOST, port=CHROMADB_PORT)
         collection = chroma_client.get_or_create_collection("langchain")
         vectorstore = Chroma(
             client=chroma_client,
@@ -248,8 +255,8 @@ async def upload_pdf(req: func.HttpRequest) -> func.HttpResponse:
 @app.route(route="rag_chat", methods=[func.HttpMethod.POST])
 def rag_chat(req: func.HttpRequest) -> func.HttpResponse:
 
-    embedding_function = OpenAIEmbeddings()
-    chroma_client = chromadb.HttpClient(host='4.242.36.157', port=8000)
+    embedding_function = OpenAIEmbeddings(api_key=OPENAI_API_KEY)
+    chroma_client = chromadb.HttpClient(host=CHROMADB_HOST, port=CHROMADB_PORT)
     collection = chroma_client.get_or_create_collection("langchain")
     vectorstore = Chroma(
         client=chroma_client,
@@ -257,7 +264,7 @@ def rag_chat(req: func.HttpRequest) -> func.HttpResponse:
         embedding_function=embedding_function,
     )
 
-    llm = ChatOpenAI(model=model)
+    llm = ChatOpenAI(model=model, api_key=OPENAI_API_KEY)
 
     retriever = vectorstore.as_retriever(
             search_kwargs={"k": 5, "filter": {"pdf_uuid": req.get_json()['pdf_uuid']}}
