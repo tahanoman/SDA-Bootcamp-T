@@ -3,7 +3,7 @@ name: Python App CI/CD Pipeline with Direct Deployment
 on:
   push:
     branches:
-      - stage-6
+      - stage-6.1
 
 jobs:
   build-and-deploy:
@@ -35,9 +35,9 @@ jobs:
     
     - name: Azure Webapp Update
       run: |
-        az vm extension set \
+        az vmss extension set \
           --resource-group ${{ secrets.WEEK4_RESOURCE_GROUP }} \
-          --vm-name ${{ secrets.WEEK4_VM_NAME }} \
+          --vmss-name ${{ secrets.WEEK4_VMSS_NAME }} \
           --name CustomScript \
           --force-update \
           --publisher Microsoft.Azure.Extensions \
