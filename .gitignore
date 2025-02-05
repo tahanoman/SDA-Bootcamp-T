@@ -10,3 +10,4 @@ chroma.log
 /azure-function/.vscode
 /azure-function/__pycache__
 azure-function/local.settings.json
+.DS_Store

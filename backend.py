@@ -57,7 +57,11 @@ model = "gpt-3.5-turbo"
 # VECTOR_DB_DIR = "chromadb"
 # os.makedirs(VECTOR_DB_DIR, exist_ok=True)
 
+<<<<<<< HEAD
 llm = ChatOpenAI(model=model, api_key=OPENAI_API_KEY)
+=======
+llm = ChatOpenAI(api_key=OPENAI_API_KEY, model=model)
+>>>>>>> 9ac474d69126c6d8a753cf729f4dc9b6a886fbbf
 
 # LangChain setup
 embedding_function = OpenAIEmbeddings(api_key=OPENAI_API_KEY)
