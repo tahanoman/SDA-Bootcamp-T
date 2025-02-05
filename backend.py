@@ -57,11 +57,11 @@ model = "gpt-3.5-turbo"
 # VECTOR_DB_DIR = "chromadb"
 # os.makedirs(VECTOR_DB_DIR, exist_ok=True)
 
-llm = ChatOpenAI(model=model)
+llm = ChatOpenAI(model=model, api_key=OPENAI_API_KEY)
 
 # LangChain setup
-embedding_function = OpenAIEmbeddings()
-chroma_client = chromadb.HttpClient(host=os.environ.get("CHROMADB_HOST"), port=os.environ.get("CHROMADB_PORT"))
+embedding_function = OpenAIEmbeddings(api_key=OPENAI_API_KEY)
+chroma_client = chromadb.HttpClient(host=CHROMADB_HOST, port=CHROMADB_PORT)
 collection = chroma_client.get_or_create_collection("langchain")
 vectorstore = Chroma(
             client=chroma_client,

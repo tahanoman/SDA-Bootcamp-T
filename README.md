@@ -24,7 +24,7 @@ All the requirements are in the `requirements.txt`
 
 To use RAG, we need to start the chromaDB fisrt, using the follow command to start the Chroma server:
 ```
-chroma run --path /db_path
+chroma run --host 0.0.0.0 --path /db_path
 ```
 change `/db_path` to the path you want to store the data, for example: `chromadb`.
 
