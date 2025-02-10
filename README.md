@@ -22,6 +22,8 @@ Or if you want you can create a new table called `advanced_chats_new` using abov
 
 Since we need to add the CosmosDB connection in the Azure Function, we also need to store the `PROJ-COSMOSDB-ENDPOINT`, `PROJ-COSMOSDB-KEY`, `PROJ-COSMOSDB-DATABASE`, `PROJ-COSMOSDB-CONTAINER` in the **Azure Key Vault**.
 
+When deploy to the Azure function, don't forget to upload the `local.settings.json` to the cloud.
+
 And since the front-end is still running on the instance and it needs to connect to the Azure Function APP, so let's store the Function URL in the Azure KeyVault as well.
 In this case, to allow the front-end able to load the URL from secret, we need to update the front-end codes a little bit and store the `KEY_VAULT_NAME` in the `.env` file on the instance where we run the front-end.
 Please make sure your instance has the permission to load the secret from the KeyVault.
@@ -45,9 +47,6 @@ PROJ-COSMOSDB-KEY
 PROJ-COSMOSDB-DATABASE
 PROJ-COSMOSDB-CONTAINER
 ```
-
-
-When deploy to the Azure function, don't forget to upload the `local.settings.json` to the cloud.
 
 We still need to run the ChromaDB and streamlit in the VM. Using the follow command to start the Chroma server:
 ```
