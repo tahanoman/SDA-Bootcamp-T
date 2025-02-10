@@ -1,11 +1,23 @@
 import streamlit as st
 import uuid
 import requests
+from dotenv import load_dotenv
+from azure.identity import DefaultAzureCredential
+from azure.keyvault.secrets import SecretClient
+import os
 
 # Backend URLs define
 # BASE_URL = "http://127.0.0.1:8000/"
 # BASE_URL = "http://localhost:7071/api/"
-BASE_URL = "https://sda-project-demo-devid.azurewebsites.net/api/"
+load_dotenv()
+
+keyVaultName = os.environ["KEY_VAULT_NAME"]
+KVUri = f"https://{keyVaultName}.vault.azure.net"
+
+credential = DefaultAzureCredential()
+kv_client = SecretClient(vault_url=KVUri, credential=credential)
+
+BASE_URL = kv_client.get_secret('PROJ-BASE-ENDPOINT-URL').value
 
 LOAD_CHAT_URL = BASE_URL + "load_chat/"
 SAVE_CHAT_URL = BASE_URL + "save_chat/"
