@@ -20,6 +20,21 @@ CREATE TABLE IF NOT EXISTS advanced_chats (
 ```
 **At this stage, since we learned the Azure KeyVault, we can store all the environment variables(***Except `KEY_VAULT_NAME`***) in the Azure KeyVault and load from there. To do this we need to enable the *System Assigned Identity* for the VM and add it to the Key Vault Access Control as a `Key Vault Secrets User`. For the Detailed steps you can check [this toturial](GrantKeyVaultAccessToVM.md)**
 
+Your Azure KeyVault should contain the following secrets:
+
+```
+PROJ-DB-NAME
+PROJ-DB-USER
+PROJ-DB-PASSWORD
+PROJ-DB-HOST
+PROJ-DB-PORT
+PROJ-OPENAI-API-KEY
+PROJ-AZURE-STORAGE-SAS-URL
+PROJ-AZURE-STORAGE-CONTAINER
+PROJ-CHROMADB-HOST
+PROJ-CHROMADB-PORT
+```
+
 All the requirements are in the `requirements.txt`
 
 To use RAG, we need to start the chromaDB fisrt, using the follow command to start the Chroma server:
