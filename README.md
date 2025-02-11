@@ -1,26 +1,55 @@
 # SDA-bootcamp-project
 
-Stage 6 - **RAG** Chatbot with Chat history **(Cloud Storage)**
+Stage 6 - **RAG** Chatbot with Chat history **(Dockerization)**
 
 A RAG chatbot using streamlit and FastAPI. At this stage we will add the RAG function to the bot.
-Other than creating normal chat, user can upload `pdf` file to the chatbot and ask questions specific to this document.
-Since we are moving to the cloud, instead of storing the chat logs and pdf files on the instance, we can store them in the Azure blob storage to save more space for the instance.
+At this stage, we will dockerize our backend codes into a docker image and deploy it on the Azure Container App.
+The functionality of the codes is same as the codes we were using in stage 8, which store the chat history in the CosmosDB.
 
-In thie stage we still use the `advanced_chats` table with following schema:
+
+For the database, we can still use the `advanced_chats_new` table(the table we used in stage 8):
 ```
 CREATE TABLE IF NOT EXISTS advanced_chats (
     id TEXT PRIMARY KEY,
     name TEXT NOT NULL,
-    file_path TEXT NOT null,
+    -- file_path TEXT NOT null,
     last_update TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     pdf_path TEXT,
     pdf_name TEXT,
     pdf_uuid TEXT
 )
 ```
-Besides storing the `OPENAI_API_KEY` and **Database Credentials** in `.env` file, we also need to store `AZURE_STORAGE_SAS_URL` and `AZURE_STORAGE_CONTAINER` in order to connnect to the blob storage.
 
-After you move the database from VM to Azure Postgresql, don't forget to update the Database Credentials in the `.env` file.
+> **Note:** The codes in this branch is just the showcase that how to interact with CosmosDB, so we **only** store the chat history to the CosmosDB. Actually students can upload all the metadata to the CosmosDB to replace the PostgreSQL. In that case, we also make the database fully serverless.
+
+Since we need to add the CosmosDB connection in the Azure Function, we also need to store the `PROJ-COSMOSDB-ENDPOINT`, `PROJ-COSMOSDB-KEY`, `PROJ-COSMOSDB-DATABASE`, `PROJ-COSMOSDB-CONTAINER` in the **Azure Key Vault**.
+
+
+And since the front-end is still running on the instance and it needs to connect to the Azure Function APP, so let's store the Function URL in the Azure KeyVault as well.
+In this case, to allow the front-end able to load the URL from secret, we need to update the front-end codes a little bit and store the `KEY_VAULT_NAME` in the `.env` file on the instance where we run the front-end.
+Please make sure your instance has the permission to load the secret from the KeyVault.
+
+**For the backend, since we will deploy it to the Azure Container App, so we need to pass the `KEY_VAULT_NAME` into the image when we create it.**
+
+Now, the following secrets should be created in your Azure KeyVault:
+
+```
+PROJ-DB-NAME
+PROJ-DB-USER
+PROJ-DB-PASSWORD
+PROJ-DB-HOST
+PROJ-DB-PORT
+PROJ-OPENAI-API-KEY
+PROJ-AZURE-STORAGE-SAS-URL
+PROJ-AZURE-STORAGE-CONTAINER
+PROJ-CHROMADB-HOST
+PROJ-CHROMADB-PORT
+PROJ-BASE-ENDPOINT-URL
+PROJ-COSMOSDB-ENDPOINT
+PROJ-COSMOSDB-KEY
+PROJ-COSMOSDB-DATABASE
+PROJ-COSMOSDB-CONTAINER
+```
 
 All the requirements are in the `requirements.txt`
 
@@ -29,12 +58,6 @@ To use RAG, we need to start the chromaDB fisrt, using the follow command to sta
 chroma run --path /db_path
 ```
 change `/db_path` to the path you want to store the data, for example: `chromadb`.
-
-Then, start the backend app using:
-
-```
-uvicorn backend:app --reload --port 5000
-```
 
 And then use 
 ```
