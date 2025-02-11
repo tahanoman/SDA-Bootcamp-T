@@ -17,14 +17,14 @@ KVUri = f"https://{keyVaultName}.vault.azure.net"
 credential = DefaultAzureCredential()
 kv_client = SecretClient(vault_url=KVUri, credential=credential)
 
-BASE_URL = kv_client.get_secret('PROJ-BASE-ENDPOINT-URL').value
+BASE_URL = kv_client.get_secret('PROJ-AZURE-CONTAINER-APP-URL').value
 
-LOAD_CHAT_URL = BASE_URL + "load_chat/"
-SAVE_CHAT_URL = BASE_URL + "save_chat/"
-DELETE_CHAT_URL = BASE_URL + "delete_chat/"
-UPLOAD_PDF_URL = BASE_URL + "upload_pdf/"
-CHAT_URL = BASE_URL + "chat/"
-RAG_CHAT_URL = BASE_URL + "rag_chat/"
+LOAD_CHAT_URL = BASE_URL + "/load_chat/"
+SAVE_CHAT_URL = BASE_URL + "/save_chat/"
+DELETE_CHAT_URL = BASE_URL + "/delete_chat/"
+UPLOAD_PDF_URL = BASE_URL + "/upload_pdf/"
+CHAT_URL = BASE_URL + "/chat/"
+RAG_CHAT_URL = BASE_URL + "/rag_chat/"
 
 # Initialize session state
 if "history_chats" not in st.session_state:

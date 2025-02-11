@@ -29,7 +29,9 @@ And since the front-end is still running on the instance and it needs to connect
 In this case, to allow the front-end able to load the URL from secret, we need to update the front-end codes a little bit and store the `KEY_VAULT_NAME` in the `.env` file on the instance where we run the front-end.
 Please make sure your instance has the permission to load the secret from the KeyVault.
 
-**For the backend, since we will deploy it to the Azure Container App, so we need to pass the `KEY_VAULT_NAME` into the image when we create it.**
+**For the backend, since we will deploy it to the Azure Container App, so we need to set the `KEY_VAULT_NAME` when creating the Azure Container APP. Don't forget to give you Azure Container APP permission to access the Azure Key Vault.**
+
+**And since the front-end codes will connect to the Azure Container APP, we need to store the `PROJ-AZURE-CONTAINER-APP-URL` in the Azure Key Vault as well**
 
 Now, the following secrets should be created in your Azure KeyVault:
 
@@ -49,6 +51,7 @@ PROJ-COSMOSDB-ENDPOINT
 PROJ-COSMOSDB-KEY
 PROJ-COSMOSDB-DATABASE
 PROJ-COSMOSDB-CONTAINER
+PROJ-AZURE-CONTAINER-APP-URL
 ```
 
 All the requirements are in the `requirements.txt`

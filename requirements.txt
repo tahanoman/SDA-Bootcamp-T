@@ -13,4 +13,5 @@ azure-cosmos
 azure-identity
 azure-keyvault-secrets
 pypdf
+python-multipart
 cryptography==41.0.2
