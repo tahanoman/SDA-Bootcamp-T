@@ -18,7 +18,8 @@ if "openai_model" not in st.session_state:
 
 # Set up chat messages
 if "messages" not in st.session_state:
-    st.session_state.messages = []
+    st.session_state.messages = [] 
+    # [{"role": "user" or "assistant", "content": "message"}, ...]
 
 # Display chat messages
 for message in st.session_state.messages:
