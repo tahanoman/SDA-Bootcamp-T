@@ -27,21 +27,21 @@ if prompt := st.chat_input("What is up?"):
                 {"role": m["role"], "content": m["content"]}
                 for m in st.session_state.messages
             ]
-        }
+        } # chat history
         headers = {
             "Content-Type": "application/json"
         }
 
         # No Stream approach
-        # stream = requests.post(chat_url, json=payload, headers=headers)
-        # response = stream.json()["reply"]
-        # st.markdown(response)
+        stream = requests.post(chat_url, json=payload, headers=headers)
+        response = stream.json()["reply"]
+        st.markdown(response)
 
         # Stream approach
-        def get_stream_response():
-            with requests.post(chat_url, json=payload, headers=headers, stream=True) as r:
-                for chunk in r:
-                    yield chunk.decode('utf-8')
-        response = st.write_stream(get_stream_response)
+        # def get_stream_response():
+        #     with requests.post(chat_url, json=payload, headers=headers, stream=True) as r:
+        #         for chunk in r:
+        #             yield chunk.decode('utf-8')
+        # response = st.write_stream(get_stream_response)
 
     st.session_state.messages.append({"role": "assistant", "content": response})

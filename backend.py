@@ -20,26 +20,26 @@ class ChatRequest(BaseModel):
 @app.post("/chat/")
 async def chat(request: ChatRequest):
     try:
-        stream = client.chat.completions.create(
+        response = client.chat.completions.create(
             model=model,
             messages=request.messages,
-            stream=True,
+            # stream=True,
         )
 
         # if you don't want to stream the output
         # set the stream parameter to False in above function
         # and uncommnet the belowing line
-        # return {"reply": response.choices[0].message.content}
+        return {"reply": response.choices[0].message.content}
 
         # Function to send out the stream data
-        def stream_response():
-            for chunk in stream:
-                delta = chunk.choices[0].delta.content
-                if delta:
-                    yield delta
+        # def stream_response():
+        #     for chunk in stream:
+        #         delta = chunk.choices[0].delta.content
+        #         if delta:
+        #             yield delta
 
         # Use StreamingResponse to return
-        return StreamingResponse(stream_response(), media_type="text/plain")
+        # return StreamingResponse(stream_response(), media_type="text/plain")
     
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
