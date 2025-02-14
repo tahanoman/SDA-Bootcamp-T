@@ -2,10 +2,10 @@
 
 Stage 4 - **RAG** Chatbot with Chat history
 
-A RAG chatbot using streamlit and FastAPI. At this stage we will add the RAG function to the bot.
+A RAG chatbot using Streamlit and FastAPI. At this stage, we will add the RAG function to the bot.
 Other than creating normal chat, user can upload `pdf` file to the chatbot and ask questions specific to this document 
 
-In thie stage we will create a **new** table called `advanced_chats` in the database using following schema:
+In this stage, we will create a **new** table called `advanced_chats` in the database using the following schema:
 ```
 CREATE TABLE IF NOT EXISTS advanced_chats (
     id TEXT PRIMARY KEY,
@@ -23,7 +23,7 @@ Please store your `OPENAI_API_KEY` and **Database Credentials** in `.env` file.
 
 All the requirements are in the `requirements.txt`
 
-To use RAG, we need to start the chromaDB fisrt, using the follow command to start the Chroma server:
+To use RAG, we need to start the chromaDB first, using the following command to start the Chroma server:
 ```
 chroma run --path /db_path
 ```
@@ -35,10 +35,10 @@ Then, start the backend app using:
 uvicorn backend:app --reload --port 5000
 ```
 
-> Compare to the last stage, we add a `port` parameter to change the port to `5000`, since the chromadb gonna use the port 8000 as well, so we add this to avoid port conflict.
+> Compared to the last stage, we added a `port` parameter to change the port to `5000`. Since the chromadb will also use port 8000, we added this to avoid port conflict.
 
 And then use 
 ```
 streamlit run chatbot.py
 ```
-to run the streamlit app.
+to run the Streamlit app.
