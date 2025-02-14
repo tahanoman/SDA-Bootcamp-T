@@ -1,10 +1,10 @@
 # SDA-bootcamp-project
 
-Stage 3 - Chatbot with Chat history
+Stage 3 - Chatbot with Chat History
 
-A basic chatbot using streamlit and FastAPI. At this stage we will store the chat history at local path, and also log the coresponding chat id, chat name and chat history file path in a database. In this case, every time we open our chatbot, it will automatically load the previous chat history.
+A basic chatbot using Streamlit and FastAPI. At this stage, we will store the chat history on the local path and also log the corresponding chat ID, chat name and chat history file path in a database. In this case, every time we open our chatbot, it will automatically load the previous chat history.
 
-In thie stage I create a table called `chats` in the database using following schema:
+In this stage I create a table called `chats` in the database using the following schema:
 ```
 CREATE TABLE IF NOT EXISTS chats (
     id TEXT PRIMARY KEY,
@@ -36,4 +36,4 @@ And then use
 ```
 streamlit run chatbot.py
 ```
-to run the streamlit app. Make sure that always start the backend first!
+to run the Streamlit app. Make sure that you always start the backend first!
