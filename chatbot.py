@@ -6,10 +6,13 @@ import requests
 # Initialize session state
 if "history_chats" not in st.session_state:
     st.session_state["history_chats"] = []
+    # [{"id": "chat_id", "messages": [{"role": "user", "content": "message"}, ...]}, ...]
 if "current_chat" not in st.session_state:
     st.session_state["current_chat"] = None
+    # chat_id
 if "chat_names" not in st.session_state:
     st.session_state["chat_names"] = {}
+    # {"chat_id": "chat_name", ...}
 
 # Functions to manage chats
 
@@ -54,10 +57,12 @@ def create_chat(chat_name):
 def delete_chat():
     if st.session_state["current_chat"]:
         chat_id = st.session_state["current_chat"]
+        # Remove chat from history
         st.session_state["history_chats"] = [
             chat for chat in st.session_state["history_chats"] if chat["id"] != chat_id
         ]
         del st.session_state["chat_names"][chat_id]
+        # Remove chat from database
         payload = {
                 "chat_id": chat_id
         }
@@ -67,7 +72,7 @@ def delete_chat():
 
         if response.status_code != 200:
             print(f"Failed to delete data. Status code: {response.status_code}")
-
+        # Update current chat
         st.session_state["current_chat"] = (
             st.session_state["history_chats"][0]["id"] if st.session_state["history_chats"] else None
         )
@@ -112,6 +117,7 @@ if st.session_state["current_chat"]:
     chat_name = st.session_state["chat_names"][chat_id]
     st.subheader(f"Current Chat: {chat_name}")
 
+    # Get current chat
     current_chat = next(
         (chat for chat in st.session_state["history_chats"] if chat["id"] == chat_id),
         None,

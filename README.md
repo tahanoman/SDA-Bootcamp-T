@@ -16,6 +16,16 @@ CREATE TABLE IF NOT EXISTS chats (
 
 Please store your `OPENAI_API_KEY` and **Database Credentials** in `.env` file.
 
+Now the `.env` file should look like:
+```
+OPENAI_API_KEY=YOUR-OPENAI-API-KEY
+DB_NAME = YOUR-DB-NAME
+DB_USER = YOUR-DB-USER
+DB_PASSWORD = YOUR-DB-PASSWORD
+DB_HOST = YOUR-DB-HOST
+DB_PORT = YOUR-DB-PORT
+```
+
 Start the backend app first using:
 
 ```
