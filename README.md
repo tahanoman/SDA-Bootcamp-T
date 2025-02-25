@@ -1,28 +1,42 @@
-# SDA-bootcamp-project
+<img src='https://s3.amazonaws.com/weclouddata/images/logos/wcd_logo_new_2.png' width='25%'>
+
+# SDA-bootcamp-project  
 
 ## Stage 2 - Basic Chatbot with FastAPI
 
-### Stage Introduction 
-A basic chatbot using Streamlit and OpenAI API. At this stage we move the call to OpenAI to the backend using FastAPI.
+### Stage Introduction
 
-![stage2](https://weclouddata.s3.us-east-1.amazonaws.com/cloud/project-stages/stage-2.png)
+In this stage, we enhance our basic chatbot by **introducing FastAPI** as a backend service. Instead of making direct calls to the **OpenAI API** from the frontend, we now handle these requests through the FastAPI backend.  
 
-In this setup, when a user interacts with the Streamlit frontend, the request is sent to the FastAPI backend. The backend then calls the OpenAI API and returns the results to the frontend. 
+![stage2](https://weclouddata.s3.us-east-1.amazonaws.com/cloud/project-stages/stage-2.png)  
 
-By splitting responsibilities in this way, the frontend focuses on user interaction and session management, while the backend handles all business logic. As a result, as long as the backend endpoints remain active, you can replace the Streamlit interface with any other frontend technology without losing the core functionality of the application.
+With this setup, when a user interacts with the **Streamlit frontend**, their request is sent to the **FastAPI backend**, which then calls the **OpenAI API** and returns the response.  
+
+By **separating responsibilities**, the frontend focuses on **user interaction and session management**, while the backend handles **business logic and API calls**. This modular approach ensures that as long as the backend is running, the frontend can be replaced or updated with another technology **without affecting core functionality**.  
+
+---
 
 ### How to Get Started
 
-Store your `OPENAI_API_KEY` in `.env` file.
+#### **Step 1: Set Up Environment Variables**  
+Store your **OpenAI API key** in a `.env` file:
 
-Start the backend app first using:
-
+```env
+OPENAI_API_KEY=YOUR-OPENAI-API-KEY
 ```
+
+#### **Step 2: Start the Backend**  
+Before running the chatbot, start the **FastAPI** backend:
+
+```bash
 uvicorn backend:app --reload
 ```
 
-And then use 
-```
+#### **Step 3: Start the Frontend**  
+Once the backend is running, launch the **Streamlit** app with:
+
+```bash
 streamlit run chatbot.py
 ```
-to run the streamlit app. Make sure that always start the backend first!
+
+> **Note:** Always start the backend first to ensure the chatbot functions properly.
