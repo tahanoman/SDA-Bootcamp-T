@@ -1,3 +1,5 @@
+<img src='https://s3.amazonaws.com/weclouddata/images/logos/wcd_logo_new_2.png' width='25%'>
+
 # SDA-bootcamp-project
 
 ## Stage 4 - RAG Chatbot with Chat History
