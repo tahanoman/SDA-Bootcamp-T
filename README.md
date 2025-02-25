@@ -56,6 +56,7 @@ PROJ-CHROMADB-PORT
 PROJ-BASE-ENDPOINT-URL
 ```
 
+The value of PROJ-BASE-ENDPOINT-URL is like `https://<your-function-app-name>.azurewebsites.net/api/`
 
 We still need to run the ChromaDB and streamlit in the VM. Using the follow command to start the Chroma server:
 ```
