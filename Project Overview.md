@@ -30,7 +30,7 @@ At this stage, we will develop an RAG chatbot in the local environment. We will 
 At the end of Milestone 1, we should be able to use Terraform to provision the following resources: a VMSS to host our application, a VM to host our vector database, an Azure Database for PostgreSQL to store data, an Azure Storage Account to store files, an Azure Application Gateway to redirect traffic, and an Azure Key Vault to store secrets and environment variables
 
 **Estimate Due Date:**  
-Mid of April
+The end of April
 
 **Stage breakdown:**
 
@@ -50,26 +50,26 @@ Mid of April
 - Stage 6:
   - We have to manually add an Azure Storage account, and an Azure Database for PostgreSQL on Azure. It is due by week 4\.
   - Once the application is running on the VM, we will configure a GitHub Action workflow to deploy our application to the VM continuously. This is due by week 4
-  - Once we have learnt Terraform, we will launch stage 6 infrastructure with it. This is due by week 5
+  - Once we have learnt Terraform, we will launch stage 6 infrastructure with it. This is due by week 6
 
 ![stage6](https://weclouddata.s3.us-east-1.amazonaws.com/cloud/project-stages/week3-stage6.png)
 
 - Stage 6.1:
   - We have to manually add a VMSS to host our application and an Application Gateway to redirect traffic. It is due by week 5\.
   - Once the application is running on the VMSS, we will configure a GitHub Action workflow to deploy our application to the VM continuously. This is due by week 5
-  - Once we have learnt Terrafrom, we will launch stage 6.1 infrastructure with it. This is due by week 7
+  - Once we have learnt Terrafrom, we will launch stage 6.1 infrastructure with it. This is due by week 8
 
 ![stage6.1](https://weclouddata.s3.us-east-1.amazonaws.com/cloud/project-stages/week4-stage6.1.png)
 
 - Stage 6.5:
   - We have to manually add an Azure Key Vault to store the secrets and environment variables. It is due by week 7\.
-  - Once the application is running on the VMSS, we will configure a GitHub Action workflow to deploy our application to the VM continuously. This is due by week 7
-  - Once we have learnt Terrafrom, we will launch stage 6.1 infrastructure with it. This is due by week 7
+  - Once the application is running on the VMSS, we will configure a GitHub Action workflow to deploy our application to the VM continuously. This is due by week 6
+  - Once we have learnt Terrafrom, we will launch stage 6.5 infrastructure with it. This is due by week 8
 
 ![stage6.5](https://weclouddata.s3.us-east-1.amazonaws.com/cloud/project-stages/week5-stage6.5.png)
 
 - Stage 6.6:
-  - We launch 2 identical sets of infrastructure as shown in the diagram with Terraform. One can be used as our dev environment. The other one can be used as our production environment. This is due by week 7
+  - We launch 2 identical sets of infrastructure as shown in the diagram with Terraform. One can be used as our dev environment. The other one can be used as our production environment. This is due by week 8
 
 ![stage6.6](https://weclouddata.s3.us-east-1.amazonaws.com/cloud/project-stages/week5-stage6.6.png)
 
@@ -79,7 +79,7 @@ Mid of April
 At the end of Milestone 2, all the back-end codes will be deployed on the Azure Function, and the chat history will be stored on the Azure CosmosDB.
 
 **Estimate Due Date:**  
-End of April
+The first week of May
 
 **Stage breakdown:**
 
@@ -90,13 +90,13 @@ End of April
 **Infrastructure Setup:**
 
 - Stage 7:
-  - We launch the infrastructure as shown in the diagram with Terraform. In this architecture, the backend is hosted on Azure Function Apps. The VM is used to host the frontend and the streamlit. This is due by week 8\.
-  - A new CICD pipeline will be built so that when there’s an update to the backend, the change should be deployed to the Function Apps automatically. Due by week 8
+  - We launch the infrastructure as shown in the diagram with Terraform. In this architecture, the backend is hosted on Azure Function Apps. The VM is used to host the frontend and the streamlit. This is due by week 9\.
+  - A new CICD pipeline will be built so that when there’s an update to the backend, the change should be deployed to the Function Apps automatically. Due by week 9
 
 ![stage7](https://weclouddata.s3.us-east-1.amazonaws.com/cloud/project-stages/week6-stage7.png)
 
 - Stage 8:
-  - We launch the infrastructure as shown in the diagram with Terraform. A CosmosDB is added compared with the previous stage. Due by week 8
+  - We launch the infrastructure as shown in the diagram with Terraform. A CosmosDB is added compared with the previous stage. Due by week 9
 
 ![stage8](https://weclouddata.s3.us-east-1.amazonaws.com/cloud/project-stages/week6-stage8.png)
 
@@ -106,7 +106,7 @@ End of April
 By the end of this Milestone, students will be able to dockerize the functions and deploy the docker image on the Azure Container App.
 
 **Estimate Due Date:**  
-First week of May
+The middle of May
 
 **Stage breakdown:**
 
@@ -115,7 +115,7 @@ First week of May
 **Infrastructure Setup:**
 
 - Stage 10:
-  - We launch the infrastructure as shown in the diagram with Terraform. In this architecture, the backend is hosted on Azure Container Apps. The images of the backend are stored in the Azure Container Registry. The VM is used to host the frontend and the streamlit. This is due by week 10\.
-  - A new CICD pipeline will be built so that when there’s an update to the backend, the change should be deployed to the Azure Container Apps automatically. Due by week 10
+  - We launch the infrastructure as shown in the diagram with Terraform. In this architecture, the backend is hosted on Azure Container Apps. The images of the backend are stored in the Azure Container Registry. The VM is used to host the frontend and the streamlit. This is due by week 11\.
+  - A new CICD pipeline will be built so that when there’s an update to the backend, the change should be deployed to the Azure Container Apps automatically. Due by week 11
 
 ![stage10](https://weclouddata.s3.us-east-1.amazonaws.com/cloud/project-stages/week7-stage10.png)
