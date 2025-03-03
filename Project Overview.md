@@ -42,13 +42,13 @@ The end of April
 **Infrastructure Setup:**
 
 - Stage 5:
-  - We have to manually launch a VM on Azure and run our application on it. This is due by week 3
-  - Once we have learnt Terraform, we will build the stage 5 infrastructure with it. This is due by week 5
+  - We have to manually launch a VM on Azure and run our application on it. This is due by week 4
+  - Once we have learnt Terraform, we will build the stage 5 infrastructure with it. This is due by week 6
 
 ![stage5](https://weclouddata.s3.us-east-1.amazonaws.com/cloud/project-stages/week3-stage5.png)
 
 - Stage 6:
-  - We have to manually add an Azure Storage account, and an Azure Database for PostgreSQL on Azure. It is due by week 4\.
+  - We have to manually add an Azure Storage account, and an Azure Database for PostgreSQL on Azure. It is due by week 5\.
   - Once the application is running on the VM, we will configure a GitHub Action workflow to deploy our application to the VM continuously. This is due by week 4
   - Once we have learnt Terraform, we will launch stage 6 infrastructure with it. This is due by week 6
 
@@ -63,13 +63,13 @@ The end of April
 
 - Stage 6.5:
   - We have to manually add an Azure Key Vault to store the secrets and environment variables. It is due by week 7\.
-  - Once the application is running on the VMSS, we will configure a GitHub Action workflow to deploy our application to the VM continuously. This is due by week 6
-  - Once we have learnt Terrafrom, we will launch stage 6.5 infrastructure with it. This is due by week 8
+  - Once the application is running on the VMSS, we will configure a GitHub Action workflow to deploy our application to the VM continuously. This is due by week 7
+  - Once we have learnt Terrafrom, we will launch stage 6.5 infrastructure with it. This is due by week 9
 
 ![stage6.5](https://weclouddata.s3.us-east-1.amazonaws.com/cloud/project-stages/week5-stage6.5.png)
 
 - Stage 6.6:
-  - We launch 2 identical sets of infrastructure as shown in the diagram with Terraform. One can be used as our dev environment. The other one can be used as our production environment. This is due by week 8
+  - We launch 2 identical sets of infrastructure as shown in the diagram with Terraform. One can be used as our dev environment. The other one can be used as our production environment. This is due by week 9
 
 ![stage6.6](https://weclouddata.s3.us-east-1.amazonaws.com/cloud/project-stages/week5-stage6.6.png)
 
@@ -91,12 +91,12 @@ The first week of May
 
 - Stage 7:
   - We launch the infrastructure as shown in the diagram with Terraform. In this architecture, the backend is hosted on Azure Function Apps. The VM is used to host the frontend and the streamlit. This is due by week 9\.
-  - A new CICD pipeline will be built so that when there’s an update to the backend, the change should be deployed to the Function Apps automatically. Due by week 9
+  - A new CICD pipeline will be built so that when there’s an update to the backend, the change should be deployed to the Function Apps automatically. Due by week 10
 
 ![stage7](https://weclouddata.s3.us-east-1.amazonaws.com/cloud/project-stages/week6-stage7.png)
 
 - Stage 8:
-  - We launch the infrastructure as shown in the diagram with Terraform. A CosmosDB is added compared with the previous stage. Due by week 9
+  - We launch the infrastructure as shown in the diagram with Terraform. A CosmosDB is added compared with the previous stage. Due by week 10
 
 ![stage8](https://weclouddata.s3.us-east-1.amazonaws.com/cloud/project-stages/week6-stage8.png)
 
@@ -116,6 +116,6 @@ The middle of May
 
 - Stage 10:
   - We launch the infrastructure as shown in the diagram with Terraform. In this architecture, the backend is hosted on Azure Container Apps. The images of the backend are stored in the Azure Container Registry. The VM is used to host the frontend and the streamlit. This is due by week 11\.
-  - A new CICD pipeline will be built so that when there’s an update to the backend, the change should be deployed to the Azure Container Apps automatically. Due by week 11
+  - A new CICD pipeline will be built so that when there’s an update to the backend, the change should be deployed to the Azure Container Apps automatically. Due by week 12
 
 ![stage10](https://weclouddata.s3.us-east-1.amazonaws.com/cloud/project-stages/week7-stage10.png)
