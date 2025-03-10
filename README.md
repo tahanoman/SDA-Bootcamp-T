@@ -9,7 +9,7 @@ The functionality of the codes is same as the codes we were using in stage 8, wh
 
 For the database, we can still use the `advanced_chats_new` table(the table we used in stage 8):
 ```
-CREATE TABLE IF NOT EXISTS advanced_chats (
+CREATE TABLE IF NOT EXISTS advanced_chats_new (
     id TEXT PRIMARY KEY,
     name TEXT NOT NULL,
     -- file_path TEXT NOT null,
@@ -46,7 +46,6 @@ PROJ-AZURE-STORAGE-SAS-URL
 PROJ-AZURE-STORAGE-CONTAINER
 PROJ-CHROMADB-HOST
 PROJ-CHROMADB-PORT
-PROJ-BASE-ENDPOINT-URL
 PROJ-COSMOSDB-ENDPOINT
 PROJ-COSMOSDB-KEY
 PROJ-COSMOSDB-DATABASE
@@ -54,7 +53,11 @@ PROJ-COSMOSDB-CONTAINER
 PROJ-AZURE-CONTAINER-APP-URL
 ```
 
-All the requirements are in the `requirements.txt`
+PROJ-AZURE-CONTAINER-APP-URL is like `https://dev-aca-sp2.greendune-b96b6884.eastus2.azurecontainerapps.io`
+
+All the requirements for the Docker image are in the `requirements.txt`
+
+All the requirements for the VM are in the `requirements.vm.txt`
 
 To use RAG, we need to start the chromaDB fisrt, using the follow command to start the Chroma server:
 ```
