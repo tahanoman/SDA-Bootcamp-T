@@ -41,4 +41,4 @@ jobs:
           --name CustomScript \
           --force-update \
           --publisher Microsoft.Azure.Extensions \
-          --settings '{"commandToExecute": "/home/azureuser/SDA-bootcamp-project/update_app.sh"}'
+          --settings '{"commandToExecute": "/home/azureuser/SDA-Bootcamp-T/update_app.sh"}'
