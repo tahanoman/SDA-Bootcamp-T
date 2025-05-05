@@ -5,10 +5,10 @@ set -e
 date
 echo "Updating Python application on VM..."
 
-APP_DIR="/home/azureuser/SDA-bootcamp-project"
-REPO_URL="github.com/beam-data/SDA-bootcamp-project.git"
+APP_DIR="/home/azureuser/SDA-Bootcamp-T"
+REPO_URL="github.com/tahanoman/SDA-Bootcamp-T.git"
 BRANCH="stage-6"
-GITHUB_TOKEN=$GITHUB_TOKEN
+GITHUB_TOKEN="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"
 
 # Update code
 if [ -d "$APP_DIR" ]; then
@@ -19,7 +19,7 @@ else
 fi
 
 # Install dependencies
-sudo -u azureuser /home/azureuser/miniconda3/envs/myenv2/bin/pip install --upgrade pip
+sudo -u azureuser /home/azureuser/minicondai3/envs/myenv2/bin/pip install --upgrade pip
 sudo -u azureuser /home/azureuser/miniconda3/envs/myenv2/bin/pip install -r ${APP_DIR}/requirements.txt
 
 # Restart the service
